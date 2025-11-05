@@ -1,10 +1,15 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Satellite, Droplets, TreeDeciduous, BarChart3, Map, Database } from "lucide-react";
 import heroImage from "@/assets/hero-reclamation.jpg";
+import { AreaAnalysisForm } from "@/components/AreaAnalysisForm";
+import { AnalysisResults } from "@/components/AnalysisResults";
 
 const Home = () => {
+  const [analysisData, setAnalysisData] = useState<any>(null);
+
   const features = [
     {
       icon: Satellite,
@@ -132,12 +137,36 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Analysis Section */}
       <section className="py-20 bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5">
+        <div className="container space-y-8">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Analyze Your Mine Area
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Get real-time soil moisture analysis and tree growth predictions for Noamundi mine area using satellite data
+            </p>
+          </div>
+          
+          <div className="max-w-4xl mx-auto">
+            <AreaAnalysisForm onAnalysisComplete={setAnalysisData} />
+          </div>
+
+          {analysisData && (
+            <div className="max-w-6xl mx-auto">
+              <AnalysisResults data={analysisData} />
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20">
         <div className="container">
           <Card className="border-2">
             <CardHeader className="text-center space-y-4 pb-8">
-              <CardTitle className="text-3xl sm:text-4xl">Ready to Explore?</CardTitle>
+              <CardTitle className="text-3xl sm:text-4xl">Explore More Features</CardTitle>
               <CardDescription className="text-lg max-w-2xl mx-auto">
                 Access comprehensive datasets, train prediction models, and generate suitability maps for mine reclamation planning
               </CardDescription>

@@ -1,5 +1,5 @@
-import { useEffect, Fragment } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
+import { Fragment } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -30,17 +30,6 @@ interface AnalysisMapProps {
   analysisPoints: AnalysisPoint[];
   center?: [number, number];
   zoom?: number;
-}
-
-// Component to handle map center changes
-function MapController({ center }: { center: [number, number] }) {
-  const map = useMap();
-  
-  useEffect(() => {
-    map.setView(center, map.getZoom());
-  }, [center, map]);
-  
-  return null;
 }
 
 // Function to get color based on soil moisture
@@ -84,7 +73,6 @@ export const AnalysisMap = ({ analysisPoints, center = [22.1564, 85.5184], zoom 
         className="w-full h-full"
         scrollWheelZoom={true}
       >
-        <MapController center={mapCenter} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

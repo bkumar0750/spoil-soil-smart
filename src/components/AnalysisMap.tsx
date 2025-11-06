@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, Fragment } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -62,29 +62,42 @@ const getPotentialColor = (score: number) => {
 };
 
 export const AnalysisMap = ({ analysisPoints, center = [22.1564, 85.5184], zoom = 12 }: AnalysisMapProps) => {
+  // Return null if no data
+  if (!analysisPoints || analysisPoints.length === 0) {
+    return (
+      <div className="w-full h-[500px] rounded-lg overflow-hidden border flex items-center justify-center bg-muted">
+        <p className="text-muted-foreground">No analysis locations to display</p>
+      </div>
+    );
+  }
+
+  // Calculate center from first point if available
+  const mapCenter: [number, number] = analysisPoints.length > 0 && analysisPoints[0].latitude && analysisPoints[0].longitude
+    ? [analysisPoints[0].latitude, analysisPoints[0].longitude]
+    : center;
+
   return (
     <div className="w-full h-[500px] rounded-lg overflow-hidden border">
       <MapContainer
-        center={center}
+        center={mapCenter}
         zoom={zoom}
         className="w-full h-full"
         scrollWheelZoom={true}
       >
-        <MapController center={center} />
+        <MapController center={mapCenter} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        {analysisPoints.map((point) => {
+        {analysisPoints.filter(point => point.latitude && point.longitude && point.soil_moisture && point.growth_potential).map((point) => {
           const moistureValue = parseFloat(point.soil_moisture.average);
           const potentialScore = parseFloat(point.growth_potential.score);
           
           return (
-            <>
+            <Fragment key={point.id}>
               {/* Circle showing moisture level */}
               <Circle
-                key={`circle-${point.id}`}
                 center={[point.latitude, point.longitude]}
                 radius={500}
                 pathOptions={{
@@ -95,7 +108,7 @@ export const AnalysisMap = ({ analysisPoints, center = [22.1564, 85.5184], zoom 
               />
               
               {/* Marker with popup */}
-              <Marker key={`marker-${point.id}`} position={[point.latitude, point.longitude]}>
+              <Marker position={[point.latitude, point.longitude]}>
                 <Popup>
                   <div className="p-2">
                     <h3 className="font-semibold text-sm mb-2">{point.location_name}</h3>
@@ -116,7 +129,7 @@ export const AnalysisMap = ({ analysisPoints, center = [22.1564, 85.5184], zoom 
                   </div>
                 </Popup>
               </Marker>
-            </>
+            </Fragment>
           );
         })}
       </MapContainer>

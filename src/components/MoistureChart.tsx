@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, Tooltip, Legend } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, Legend } from "recharts";
 import { format } from "date-fns";
 
 interface AnalysisData {
@@ -56,6 +57,17 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
     return null;
   }
 
+  const chartConfig = {
+    moisture: {
+      label: "Soil Moisture (%)",
+      color: "hsl(var(--primary))",
+    },
+    potential: {
+      label: "Growth Potential (%)",
+      color: "hsl(var(--chart-2))",
+    },
+  };
+
   return (
     <div className="grid gap-6 md:grid-cols-2">
       {timelineData.length > 0 && (
@@ -65,7 +77,7 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
             <CardDescription>Historical soil moisture and growth potential over time</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <ChartContainer config={chartConfig} className="h-[300px] w-full">
               <LineChart data={timelineData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis
@@ -86,13 +98,7 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
                   label={{ value: 'Growth Potential (%)', angle: 90, position: 'insideRight', fontSize: 12 }}
                   className="text-muted-foreground"
                 />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px',
-                  }}
-                />
+                <ChartTooltip content={<ChartTooltipContent />} />
                 <Legend />
                 <Line
                   yAxisId="left"
@@ -113,7 +119,7 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
                   name="Growth Potential (%)"
                 />
               </LineChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </CardContent>
         </Card>
       )}
@@ -125,7 +131,7 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
             <CardDescription>Last 5 analyzed locations</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <ChartContainer config={chartConfig} className="h-[300px] w-full">
               <BarChart data={comparisonData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis
@@ -137,13 +143,7 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
                   className="text-muted-foreground"
                 />
                 <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px',
-                  }}
-                />
+                <ChartTooltip content={<ChartTooltipContent />} />
                 <Legend />
                 <Bar
                   dataKey="moisture"
@@ -158,7 +158,7 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </CardContent>
         </Card>
       )}

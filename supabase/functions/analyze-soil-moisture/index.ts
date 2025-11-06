@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.79.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -99,6 +100,34 @@ serve(async (req) => {
     };
 
     console.log('Analysis complete:', soilMoistureData);
+
+    // Save to database
+    try {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      const { error: dbError } = await supabase
+        .from('analysis_results')
+        .insert({
+          latitude,
+          longitude,
+          location_name: soilMoistureData.location.area,
+          soil_moisture: soilMoistureData.soilMoisture,
+          vegetation_indices: soilMoistureData.vegetationIndices,
+          soil_properties: soilMoistureData.soilProperties,
+          growth_potential: soilMoistureData.growthPotential,
+          analyzed_at: new Date().toISOString(),
+        });
+
+      if (dbError) {
+        console.error('Error saving to database:', dbError);
+      } else {
+        console.log('Successfully saved analysis to database');
+      }
+    } catch (dbError) {
+      console.error('Database save failed:', dbError);
+    }
 
     return new Response(JSON.stringify(soilMoistureData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

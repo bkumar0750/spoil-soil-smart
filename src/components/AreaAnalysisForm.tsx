@@ -19,9 +19,10 @@ interface AnalysisData {
 
 interface AreaAnalysisFormProps {
   onAnalysisComplete: (data: AnalysisData) => void;
+  onDataRefresh?: () => void;
 }
 
-export const AreaAnalysisForm = ({ onAnalysisComplete }: AreaAnalysisFormProps) => {
+export const AreaAnalysisForm = ({ onAnalysisComplete, onDataRefresh }: AreaAnalysisFormProps) => {
   const [latitude, setLatitude] = useState("22.1564");
   const [longitude, setLongitude] = useState("85.5184");
   const [loading, setLoading] = useState(false);
@@ -46,6 +47,11 @@ export const AreaAnalysisForm = ({ onAnalysisComplete }: AreaAnalysisFormProps) 
       });
 
       onAnalysisComplete(data);
+      
+      // Trigger data refresh if callback provided
+      if (onDataRefresh) {
+        onDataRefresh();
+      }
     } catch (error) {
       console.error('Analysis error:', error);
       toast({

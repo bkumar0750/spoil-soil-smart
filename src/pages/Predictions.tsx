@@ -1,10 +1,47 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Map, Layers, TreePine, Download, AlertCircle } from "lucide-react";
+import { MapPin, Layers, TreePine, Download, AlertCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { AnalysisMap } from "@/components/AnalysisMap";
+import { MoistureChart } from "@/components/MoistureChart";
+import { useToast } from "@/hooks/use-toast";
 
 const Predictions = () => {
+  const [analysisData, setAnalysisData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchAnalysisData();
+  }, []);
+
+  const fetchAnalysisData = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('analysis_results')
+        .select('*')
+        .order('analyzed_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      
+      setAnalysisData(data || []);
+    } catch (error) {
+      console.error('Error fetching analysis data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load analysis data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const moistureClasses = [
     { range: "< 10%", label: "Very Dry", color: "bg-red-500", suitability: "Low" },
     { range: "10-15%", label: "Dry", color: "bg-orange-500", suitability: "Low-Moderate" },
@@ -67,6 +104,46 @@ const Predictions = () => {
         </p>
       </div>
 
+      {/* Analysis Map and Charts */}
+      {!loading && analysisData.length > 0 && (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Analysis Locations Map
+              </CardTitle>
+              <CardDescription>
+                Geographic distribution of analyzed mine areas with soil moisture indicators
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AnalysisMap analysisPoints={analysisData} />
+            </CardContent>
+          </Card>
+
+          <MoistureChart data={analysisData} />
+        </div>
+      )}
+
+      {loading && (
+        <Card>
+          <CardContent className="py-8">
+            <p className="text-center text-muted-foreground">Loading analysis data...</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {!loading && analysisData.length === 0 && (
+        <Card>
+          <CardContent className="py-8">
+            <p className="text-center text-muted-foreground">
+              No analysis data available yet. Start by analyzing an area from the home page.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <Tabs defaultValue="moisture" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
           <TabsTrigger value="moisture">Soil Moisture</TabsTrigger>
@@ -80,7 +157,7 @@ const Predictions = () => {
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20 text-accent">
-                  <Map className="h-5 w-5" />
+                  <MapPin className="h-5 w-5" />
                 </div>
                 <div>
                   <CardTitle>Soil Moisture Prediction Map</CardTitle>
@@ -92,7 +169,7 @@ const Predictions = () => {
               {/* Placeholder for interactive map */}
               <div className="w-full h-96 bg-muted rounded-lg flex items-center justify-center border-2 border-dashed">
                 <div className="text-center space-y-2">
-                  <Map className="h-12 w-12 mx-auto text-muted-foreground" />
+                  <MapPin className="h-12 w-12 mx-auto text-muted-foreground" />
                   <p className="text-muted-foreground">Interactive map visualization</p>
                   <p className="text-sm text-muted-foreground">Integrate with Leaflet/Mapbox for production</p>
                 </div>

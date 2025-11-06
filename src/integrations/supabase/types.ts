@@ -14,7 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analysis_results: {
+        Row: {
+          analyzed_at: string
+          created_at: string
+          growth_potential: Json
+          id: string
+          latitude: number
+          location_name: string | null
+          longitude: number
+          soil_moisture: Json
+          soil_properties: Json
+          vegetation_indices: Json
+        }
+        Insert: {
+          analyzed_at?: string
+          created_at?: string
+          growth_potential: Json
+          id?: string
+          latitude: number
+          location_name?: string | null
+          longitude: number
+          soil_moisture: Json
+          soil_properties: Json
+          vegetation_indices: Json
+        }
+        Update: {
+          analyzed_at?: string
+          created_at?: string
+          growth_potential?: Json
+          id?: string
+          latitude?: number
+          location_name?: string | null
+          longitude?: number
+          soil_moisture?: Json
+          soil_properties?: Json
+          vegetation_indices?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

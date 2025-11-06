@@ -81,9 +81,10 @@ export const AnalysisMap = ({ analysisPoints, center = [22.1564, 85.5184], zoom 
           const potentialScore = parseFloat(point.growth_potential.score);
           
           return (
-            <div key={point.id}>
+            <>
               {/* Circle showing moisture level */}
               <Circle
+                key={`circle-${point.id}`}
                 center={[point.latitude, point.longitude]}
                 radius={500}
                 pathOptions={{
@@ -94,7 +95,7 @@ export const AnalysisMap = ({ analysisPoints, center = [22.1564, 85.5184], zoom 
               />
               
               {/* Marker with popup */}
-              <Marker position={[point.latitude, point.longitude]}>
+              <Marker key={`marker-${point.id}`} position={[point.latitude, point.longitude]}>
                 <Popup>
                   <div className="p-2">
                     <h3 className="font-semibold text-sm mb-2">{point.location_name}</h3>
@@ -115,7 +116,7 @@ export const AnalysisMap = ({ analysisPoints, center = [22.1564, 85.5184], zoom 
                   </div>
                 </Popup>
               </Marker>
-            </div>
+            </>
           );
         })}
       </MapContainer>

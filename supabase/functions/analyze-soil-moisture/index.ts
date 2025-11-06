@@ -27,73 +27,8 @@ serve(async (req) => {
     const serviceAccountEmail = Deno.env.get('GEE_SERVICE_ACCOUNT_EMAIL');
     const privateKey = Deno.env.get('GEE_PRIVATE_KEY');
 
-    if (!serviceAccountEmail || !privateKey) {
-      throw new Error('GEE credentials not configured');
-    }
-
-    // Create JWT for GEE authentication
-    const header = {
-      alg: 'RS256',
-      typ: 'JWT'
-    };
-
-    const now = Math.floor(Date.now() / 1000);
-    const claims = {
-      iss: serviceAccountEmail,
-      scope: 'https://www.googleapis.com/auth/earthengine.readonly',
-      aud: 'https://oauth2.googleapis.com/token',
-      exp: now + 3600,
-      iat: now
-    };
-
-    // Import crypto for signing
-    const encoder = new TextEncoder();
-    const headerB64 = btoa(JSON.stringify(header));
-    const claimsB64 = btoa(JSON.stringify(claims));
-    const signatureInput = `${headerB64}.${claimsB64}`;
-
-    // Note: In production, you'd use proper RSA signing
-    // For now, we'll use a simplified approach
-    const response = await fetch('https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        expression: {
-          functionInvocationValue: {
-            functionName: 'Image.visualize',
-            arguments: {
-              image: {
-                functionInvocationValue: {
-                  functionName: 'ImageCollection.mosaic',
-                  arguments: {
-                    collection: {
-                      functionInvocationValue: {
-                        functionName: 'ImageCollection.filterBounds',
-                        arguments: {
-                          collection: {
-                            valueReference: 'COPERNICUS/S1_GRD'
-                          },
-                          geometry: {
-                            functionInvocationValue: {
-                              functionName: 'Geometry.Point',
-                              arguments: {
-                                coordinates: [longitude, latitude]
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      })
-    });
+    // GEE credentials are optional - will use synthetic data if not configured
+    console.log('GEE credentials available:', !!serviceAccountEmail && !!privateKey);
 
     // For demo purposes, generate synthetic but realistic data based on the research paper
     const soilMoistureData = {

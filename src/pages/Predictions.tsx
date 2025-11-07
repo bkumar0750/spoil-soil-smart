@@ -3,20 +3,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Layers, TreePine, Download, AlertCircle } from "lucide-react";
+import { MapPin, Layers, TreePine, Download, AlertCircle, Calendar as CalendarIcon, FileDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AnalysisMap } from "@/components/AnalysisMap";
 import { MoistureChart } from "@/components/MoistureChart";
 import { useToast } from "@/hooks/use-toast";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 const Predictions = () => {
   const [analysisData, setAnalysisData] = useState<any[]>([]);
+  const [filteredData, setFilteredData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
   const { toast } = useToast();
 
   useEffect(() => {
     fetchAnalysisData();
   }, []);
+
+  useEffect(() => {
+    filterDataByDateRange();
+  }, [analysisData, dateFrom, dateTo]);
 
   const fetchAnalysisData = async () => {
     try {
@@ -40,6 +51,93 @@ const Predictions = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const filterDataByDateRange = () => {
+    if (!dateFrom && !dateTo) {
+      setFilteredData(analysisData);
+      return;
+    }
+
+    const filtered = analysisData.filter((item) => {
+      const itemDate = new Date(item.analyzed_at);
+      
+      if (dateFrom && dateTo) {
+        return itemDate >= dateFrom && itemDate <= dateTo;
+      } else if (dateFrom) {
+        return itemDate >= dateFrom;
+      } else if (dateTo) {
+        return itemDate <= dateTo;
+      }
+      
+      return true;
+    });
+
+    setFilteredData(filtered);
+  };
+
+  const exportToCSV = () => {
+    if (filteredData.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No data available to export",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const headers = [
+      "Location Name",
+      "Latitude",
+      "Longitude",
+      "Analyzed Date",
+      "Soil Moisture (Average)",
+      "Soil Moisture (Min)",
+      "Soil Moisture (Max)",
+      "Soil Moisture Trend",
+      "Growth Potential Score",
+      "Growth Potential Suitability",
+    ];
+
+    const rows = filteredData.map((item) => [
+      item.location_name || "N/A",
+      item.latitude,
+      item.longitude,
+      format(new Date(item.analyzed_at), "yyyy-MM-dd HH:mm:ss"),
+      item.soil_moisture?.average || "N/A",
+      item.soil_moisture?.min || "N/A",
+      item.soil_moisture?.max || "N/A",
+      item.soil_moisture?.trend || "N/A",
+      item.growth_potential?.score || "N/A",
+      item.growth_potential?.suitability || "N/A",
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `analysis_data_${format(new Date(), "yyyy-MM-dd_HHmmss")}.csv`);
+    link.style.visibility = "hidden";
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({
+      title: "Success",
+      description: `Exported ${filteredData.length} records to CSV`,
+    });
+  };
+
+  const clearDateFilter = () => {
+    setDateFrom(undefined);
+    setDateTo(undefined);
   };
 
   const moistureClasses = [
@@ -104,8 +202,84 @@ const Predictions = () => {
         </p>
       </div>
 
+      {/* Filter and Export Controls */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center flex-1">
+              <div className="flex gap-2 items-center">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "justify-start text-left font-normal",
+                        !dateFrom && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateFrom ? format(dateFrom, "PPP") : "From date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dateFrom}
+                      onSelect={setDateFrom}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+
+                <span className="text-muted-foreground">to</span>
+
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "justify-start text-left font-normal",
+                        !dateTo && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateTo ? format(dateTo, "PPP") : "To date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dateTo}
+                      onSelect={setDateTo}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {(dateFrom || dateTo) && (
+                <Button variant="ghost" size="sm" onClick={clearDateFilter}>
+                  Clear Filter
+                </Button>
+              )}
+
+              <div className="text-sm text-muted-foreground">
+                Showing {filteredData.length} of {analysisData.length} records
+              </div>
+            </div>
+
+            <Button onClick={exportToCSV} className="gap-2">
+              <FileDown className="h-4 w-4" />
+              Export to CSV
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Analysis Map and Charts */}
-      {!loading && analysisData.length > 0 && (
+      {!loading && filteredData.length > 0 && (
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -118,11 +292,11 @@ const Predictions = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AnalysisMap analysisPoints={analysisData} />
+              <AnalysisMap analysisPoints={filteredData} />
             </CardContent>
           </Card>
 
-          <MoistureChart data={analysisData} />
+          <MoistureChart data={filteredData} />
         </div>
       )}
 
@@ -139,6 +313,16 @@ const Predictions = () => {
           <CardContent className="py-8">
             <p className="text-center text-muted-foreground">
               No analysis data available yet. Start by analyzing an area from the home page.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {!loading && analysisData.length > 0 && filteredData.length === 0 && (
+        <Card>
+          <CardContent className="py-8">
+            <p className="text-center text-muted-foreground">
+              No data found for the selected date range. Try adjusting your filters.
             </p>
           </CardContent>
         </Card>

@@ -23,7 +23,6 @@ interface MoistureChartProps {
   data: AnalysisData[];
 }
 
-
 export const MoistureChart = ({ data }: MoistureChartProps) => {
   // Return null if no data
   if (!data || data.length === 0) {
@@ -56,7 +55,6 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
     return null;
   }
 
-
   return (
     <div className="grid gap-6 md:grid-cols-2">
       {timelineData.length > 0 && (
@@ -77,23 +75,29 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
                   <YAxis
                     yAxisId="left"
                     tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                    label={{ value: 'Moisture (%)', angle: -90, position: 'insideLeft', fontSize: 12 }}
+                    label={{ value: 'Moisture (%)', angle: -90, position: 'insideLeft', fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
                   />
                   <YAxis
                     yAxisId="right"
                     orientation="right"
                     tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                    label={{ value: 'Growth Potential (%)', angle: 90, position: 'insideRight', fontSize: 12 }}
+                    label={{ value: 'Growth Potential (%)', angle: 90, position: 'insideRight', fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
                   />
-                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--background))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '0.5rem'
+                    }} 
+                  />
                   <Legend />
                   <Line
                     yAxisId="left"
                     type="monotone"
                     dataKey="moisture"
-                    stroke="hsl(var(--primary))"
+                    stroke="hsl(var(--chart-1))"
                     strokeWidth={2}
-                    dot={{ r: 4 }}
+                    dot={{ r: 4, fill: "hsl(var(--chart-1))" }}
                     name="Soil Moisture (%)"
                   />
                   <Line
@@ -102,7 +106,7 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
                     dataKey="potential"
                     stroke="hsl(var(--chart-2))"
                     strokeWidth={2}
-                    dot={{ r: 4 }}
+                    dot={{ r: 4, fill: "hsl(var(--chart-2))" }}
                     name="Growth Potential (%)"
                   />
                 </LineChart>
@@ -131,11 +135,17 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
                     height={80}
                   />
                   <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
-                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--background))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '0.5rem'
+                    }} 
+                  />
                   <Legend />
                   <Bar
                     dataKey="moisture"
-                    fill="hsl(var(--primary))"
+                    fill="hsl(var(--chart-1))"
                     name="Soil Moisture (%)"
                     radius={[4, 4, 0, 0]}
                   />

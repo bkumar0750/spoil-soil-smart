@@ -67,24 +67,21 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={timelineData}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
                   <XAxis
                     dataKey="date"
-                    tick={{ fontSize: 12 }}
-                    className="text-muted-foreground"
+                    tick={{ fontSize: 12, fill: "#666" }}
                   />
                   <YAxis
                     yAxisId="left"
-                    tick={{ fontSize: 12 }}
-                    className="text-muted-foreground"
-                    label={{ value: 'Moisture (%)', angle: -90, position: 'insideLeft', fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: "#666" }}
+                    label={{ value: 'Moisture (%)', angle: -90, position: 'insideLeft', fontSize: 12, fill: "#666" }}
                   />
                   <YAxis
                     yAxisId="right"
                     orientation="right"
-                    tick={{ fontSize: 12 }}
-                    className="text-muted-foreground"
-                    label={{ value: 'Growth Potential (%)', angle: 90, position: 'insideRight', fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: "#666" }}
+                    label={{ value: 'Growth Potential (%)', angle: 90, position: 'insideRight', fontSize: 12, fill: "#666" }}
                   />
                   <Line
                     yAxisId="left"
@@ -121,18 +118,16 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={comparisonData}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
                   <XAxis
                     dataKey="location"
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 10, fill: "#666" }}
                     angle={-45}
                     textAnchor="end"
                     height={80}
-                    className="text-muted-foreground"
                   />
                   <YAxis 
-                    tick={{ fontSize: 12 }}
-                    className="text-muted-foreground"
+                    tick={{ fontSize: 12, fill: "#666" }}
                   />
                   <Bar
                     dataKey="moisture"

@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, Legend, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, ResponsiveContainer } from "recharts";
 import { format } from "date-fns";
 
 interface AnalysisData {
@@ -67,46 +67,41 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={timelineData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                   <XAxis
                     dataKey="date"
-                    tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                    tick={{ fontSize: 12 }}
+                    className="text-muted-foreground"
                   />
                   <YAxis
                     yAxisId="left"
-                    tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                    label={{ value: 'Moisture (%)', angle: -90, position: 'insideLeft', fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                    tick={{ fontSize: 12 }}
+                    className="text-muted-foreground"
+                    label={{ value: 'Moisture (%)', angle: -90, position: 'insideLeft', fontSize: 12 }}
                   />
                   <YAxis
                     yAxisId="right"
                     orientation="right"
-                    tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                    label={{ value: 'Growth Potential (%)', angle: 90, position: 'insideRight', fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                    tick={{ fontSize: 12 }}
+                    className="text-muted-foreground"
+                    label={{ value: 'Growth Potential (%)', angle: 90, position: 'insideRight', fontSize: 12 }}
                   />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--background))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '0.5rem'
-                    }} 
-                  />
-                  <Legend />
                   <Line
                     yAxisId="left"
                     type="monotone"
                     dataKey="moisture"
-                    stroke="hsl(var(--chart-1))"
+                    stroke="#2d7a4f"
                     strokeWidth={2}
-                    dot={{ r: 4, fill: "hsl(var(--chart-1))" }}
+                    dot={{ r: 4, fill: "#2d7a4f" }}
                     name="Soil Moisture (%)"
                   />
                   <Line
                     yAxisId="right"
                     type="monotone"
                     dataKey="potential"
-                    stroke="hsl(var(--chart-2))"
+                    stroke="#2196F3"
                     strokeWidth={2}
-                    dot={{ r: 4, fill: "hsl(var(--chart-2))" }}
+                    dot={{ r: 4, fill: "#2196F3" }}
                     name="Growth Potential (%)"
                   />
                 </LineChart>
@@ -126,32 +121,28 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={comparisonData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                   <XAxis
                     dataKey="location"
-                    tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                    tick={{ fontSize: 10 }}
                     angle={-45}
                     textAnchor="end"
                     height={80}
+                    className="text-muted-foreground"
                   />
-                  <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--background))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '0.5rem'
-                    }} 
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    className="text-muted-foreground"
                   />
-                  <Legend />
                   <Bar
                     dataKey="moisture"
-                    fill="hsl(var(--chart-1))"
+                    fill="#2d7a4f"
                     name="Soil Moisture (%)"
                     radius={[4, 4, 0, 0]}
                   />
                   <Bar
                     dataKey="potential"
-                    fill="hsl(var(--chart-2))"
+                    fill="#2196F3"
                     name="Growth Potential (%)"
                     radius={[4, 4, 0, 0]}
                   />

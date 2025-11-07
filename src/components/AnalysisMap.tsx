@@ -1,7 +1,7 @@
-import { Fragment } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
+import { MapContainer, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { MapMarkers } from './MapMarkers';
 
 // Fix for default marker icon
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -65,6 +65,10 @@ export const AnalysisMap = ({ analysisPoints, center = [22.1564, 85.5184], zoom 
     ? [analysisPoints[0].latitude, analysisPoints[0].longitude]
     : center;
 
+  const validPoints = analysisPoints.filter(
+    point => point.latitude && point.longitude && point.soil_moisture && point.growth_potential
+  );
+
   return (
     <div className="w-full h-[500px] rounded-lg overflow-hidden border">
       <MapContainer
@@ -77,49 +81,7 @@ export const AnalysisMap = ({ analysisPoints, center = [22.1564, 85.5184], zoom 
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        
-        {analysisPoints.filter(point => point.latitude && point.longitude && point.soil_moisture && point.growth_potential).map((point) => {
-          const moistureValue = parseFloat(point.soil_moisture.average);
-          const potentialScore = parseFloat(point.growth_potential.score);
-          
-          return (
-            <Fragment key={point.id}>
-              {/* Circle showing moisture level */}
-              <Circle
-                center={[point.latitude, point.longitude]}
-                radius={500}
-                pathOptions={{
-                  color: getMoistureColor(moistureValue),
-                  fillColor: getMoistureColor(moistureValue),
-                  fillOpacity: 0.3,
-                }}
-              />
-              
-              {/* Marker with popup */}
-              <Marker position={[point.latitude, point.longitude]}>
-                <Popup>
-                  <div className="p-2">
-                    <h3 className="font-semibold text-sm mb-2">{point.location_name}</h3>
-                    <div className="space-y-1 text-xs">
-                      <div>
-                        <span className="font-medium">Soil Moisture:</span> {moistureValue.toFixed(3)} m³/m³
-                      </div>
-                      <div>
-                        <span className="font-medium">Trend:</span> {point.soil_moisture.trend}
-                      </div>
-                      <div>
-                        <span className="font-medium">Growth Potential:</span> {potentialScore.toFixed(1)}%
-                      </div>
-                      <div>
-                        <span className="font-medium">Suitability:</span> {point.growth_potential.suitability}
-                      </div>
-                    </div>
-                  </div>
-                </Popup>
-              </Marker>
-            </Fragment>
-          );
-        })}
+        <MapMarkers points={validPoints} getMoistureColor={getMoistureColor} />
       </MapContainer>
     </div>
   );

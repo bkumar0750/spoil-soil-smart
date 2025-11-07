@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, Legend } from "recharts";
+import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, Legend, Tooltip } from "recharts";
 import { format } from "date-fns";
 
 interface AnalysisData {
@@ -98,7 +98,7 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
                   label={{ value: 'Growth Potential (%)', angle: 90, position: 'insideRight', fontSize: 12 }}
                   className="text-muted-foreground"
                 />
-                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartTooltip />
                 <Legend />
                 <Line
                   yAxisId="left"
@@ -143,7 +143,7 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
                   className="text-muted-foreground"
                 />
                 <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" />
-                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartTooltip />
                 <Legend />
                 <Bar
                   dataKey="moisture"

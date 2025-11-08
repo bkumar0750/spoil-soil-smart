@@ -40,13 +40,48 @@ const getMoistureColor = (moisture: number) => {
   return '#22c55e'; // green - excellent
 };
 
-// Function to get color based on growth potential score
-const getPotentialColor = (score: number) => {
-  if (score < 40) return '#ef4444'; // red - poor
-  if (score < 60) return '#f97316'; // orange - fair
-  if (score < 75) return '#eab308'; // yellow - good
-  if (score < 85) return '#84cc16'; // lime - very good
-  return '#22c55e'; // green - excellent
+// Separate component to properly handle Leaflet context
+const MapMarkers = ({ points }: { points: AnalysisPoint[] }) => {
+  const elements = points.flatMap((point) => {
+    const moistureValue = parseFloat(point.soil_moisture.average);
+    const moistureColor = getMoistureColor(moistureValue);
+    
+    return [
+      <Circle
+        key={`circle-${point.id}`}
+        center={[point.latitude, point.longitude]}
+        radius={500}
+        pathOptions={{
+          color: moistureColor,
+          fillColor: moistureColor,
+          fillOpacity: 0.3,
+        }}
+      />,
+      <Marker key={`marker-${point.id}`} position={[point.latitude, point.longitude]}>
+        <Popup>
+          <div className="p-2">
+            <h3 className="font-semibold text-sm mb-2">{point.location_name}</h3>
+            <div className="space-y-1 text-xs">
+              <div>
+                <span className="font-medium">Soil Moisture:</span> {moistureValue.toFixed(3)} m³/m³
+              </div>
+              <div>
+                <span className="font-medium">Trend:</span> {point.soil_moisture.trend}
+              </div>
+              <div>
+                <span className="font-medium">Growth Potential:</span> {parseFloat(point.growth_potential.score).toFixed(1)}%
+              </div>
+              <div>
+                <span className="font-medium">Suitability:</span> {point.growth_potential.suitability}
+              </div>
+            </div>
+          </div>
+        </Popup>
+      </Marker>
+    ];
+  });
+  
+  return <>{elements}</>;
 };
 
 export const AnalysisMap = ({ analysisPoints, center = [22.1564, 85.5184], zoom = 12 }: AnalysisMapProps) => {
@@ -80,46 +115,7 @@ export const AnalysisMap = ({ analysisPoints, center = [22.1564, 85.5184], zoom 
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {validPoints.map((point) => {
-          const moistureValue = parseFloat(point.soil_moisture.average);
-          const moistureColor = getMoistureColor(moistureValue);
-          
-          return (
-            <Circle
-              key={`c-${point.id}`}
-              center={[point.latitude, point.longitude]}
-              radius={500}
-              pathOptions={{
-                color: moistureColor,
-                fillColor: moistureColor,
-                fillOpacity: 0.3,
-              }}
-            />
-          );
-        })}
-        {validPoints.map((point) => (
-          <Marker key={`m-${point.id}`} position={[point.latitude, point.longitude]}>
-            <Popup>
-              <div className="p-2">
-                <h3 className="font-semibold text-sm mb-2">{point.location_name}</h3>
-                <div className="space-y-1 text-xs">
-                  <div>
-                    <span className="font-medium">Soil Moisture:</span> {parseFloat(point.soil_moisture.average).toFixed(3)} m³/m³
-                  </div>
-                  <div>
-                    <span className="font-medium">Trend:</span> {point.soil_moisture.trend}
-                  </div>
-                  <div>
-                    <span className="font-medium">Growth Potential:</span> {parseFloat(point.growth_potential.score).toFixed(1)}%
-                  </div>
-                  <div>
-                    <span className="font-medium">Suitability:</span> {point.growth_potential.suitability}
-                  </div>
-                </div>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        <MapMarkers points={validPoints} />
       </MapContainer>
     </div>
   );

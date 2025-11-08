@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar } from "recharts";
+import { ChartContainer, ChartConfig } from "@/components/ui/chart";
 import { format } from "date-fns";
 
 interface AnalysisData {
@@ -22,6 +23,17 @@ interface AnalysisData {
 interface MoistureChartProps {
   data: AnalysisData[];
 }
+
+const chartConfig = {
+  moisture: {
+    label: "Soil Moisture (%)",
+    color: "#2d7a4f",
+  },
+  potential: {
+    label: "Growth Potential (%)",
+    color: "#2196F3",
+  },
+} satisfies ChartConfig;
 
 export const MoistureChart = ({ data }: MoistureChartProps) => {
   // Return null if no data
@@ -64,46 +76,44 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
             <CardDescription>Historical soil moisture and growth potential over time</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={timelineData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fontSize: 12, fill: "#666" }}
-                  />
-                  <YAxis
-                    yAxisId="left"
-                    tick={{ fontSize: 12, fill: "#666" }}
-                    label={{ value: 'Moisture (%)', angle: -90, position: 'insideLeft', fontSize: 12, fill: "#666" }}
-                  />
-                  <YAxis
-                    yAxisId="right"
-                    orientation="right"
-                    tick={{ fontSize: 12, fill: "#666" }}
-                    label={{ value: 'Growth Potential (%)', angle: 90, position: 'insideRight', fontSize: 12, fill: "#666" }}
-                  />
-                  <Line
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="moisture"
-                    stroke="#2d7a4f"
-                    strokeWidth={2}
-                    dot={{ r: 4, fill: "#2d7a4f" }}
-                    name="Soil Moisture (%)"
-                  />
-                  <Line
-                    yAxisId="right"
-                    type="monotone"
-                    dataKey="potential"
-                    stroke="#2196F3"
-                    strokeWidth={2}
-                    dot={{ r: 4, fill: "#2196F3" }}
-                    name="Growth Potential (%)"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <ChartContainer config={chartConfig} className="h-[300px] w-full">
+              <LineChart data={timelineData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 12, fill: "#666" }}
+                />
+                <YAxis
+                  yAxisId="left"
+                  tick={{ fontSize: 12, fill: "#666" }}
+                  label={{ value: 'Moisture (%)', angle: -90, position: 'insideLeft', fontSize: 12, fill: "#666" }}
+                />
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  tick={{ fontSize: 12, fill: "#666" }}
+                  label={{ value: 'Growth Potential (%)', angle: 90, position: 'insideRight', fontSize: 12, fill: "#666" }}
+                />
+                <Line
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="moisture"
+                  stroke="#2d7a4f"
+                  strokeWidth={2}
+                  dot={{ r: 4, fill: "#2d7a4f" }}
+                  name="Soil Moisture (%)"
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="potential"
+                  stroke="#2196F3"
+                  strokeWidth={2}
+                  dot={{ r: 4, fill: "#2196F3" }}
+                  name="Growth Potential (%)"
+                />
+              </LineChart>
+            </ChartContainer>
           </CardContent>
         </Card>
       )}
@@ -115,35 +125,33 @@ export const MoistureChart = ({ data }: MoistureChartProps) => {
             <CardDescription>Last 5 analyzed locations</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={comparisonData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
-                  <XAxis
-                    dataKey="location"
-                    tick={{ fontSize: 10, fill: "#666" }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 12, fill: "#666" }}
-                  />
-                  <Bar
-                    dataKey="moisture"
-                    fill="#2d7a4f"
-                    name="Soil Moisture (%)"
-                    radius={[4, 4, 0, 0]}
-                  />
-                  <Bar
-                    dataKey="potential"
-                    fill="#2196F3"
-                    name="Growth Potential (%)"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <ChartContainer config={chartConfig} className="h-[300px] w-full">
+              <BarChart data={comparisonData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                <XAxis
+                  dataKey="location"
+                  tick={{ fontSize: 10, fill: "#666" }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                />
+                <YAxis 
+                  tick={{ fontSize: 12, fill: "#666" }}
+                />
+                <Bar
+                  dataKey="moisture"
+                  fill="#2d7a4f"
+                  name="Soil Moisture (%)"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  dataKey="potential"
+                  fill="#2196F3"
+                  name="Growth Potential (%)"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ChartContainer>
           </CardContent>
         </Card>
       )}

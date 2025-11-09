@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle, LayerGroup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
+import { useEffect } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -41,6 +41,69 @@ const getMoistureColor = (moisture: number) => {
   return '#22c55e'; // green - excellent
 };
 
+// Component that properly uses Leaflet context
+const MapContent = ({ points }: { points: AnalysisPoint[] }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (points.length > 0 && points[0].latitude && points[0].longitude) {
+      map.setView([points[0].latitude, points[0].longitude], map.getZoom());
+    }
+  }, [points, map]);
+
+  const circles = points.map((point) => {
+    const moistureValue = parseFloat(point.soil_moisture.average);
+    const moistureColor = getMoistureColor(moistureValue);
+    
+    return (
+      <Circle
+        key={`circle-${point.id}`}
+        center={[point.latitude, point.longitude]}
+        radius={500}
+        pathOptions={{
+          color: moistureColor,
+          fillColor: moistureColor,
+          fillOpacity: 0.3,
+        }}
+      />
+    );
+  });
+
+  const markers = points.map((point) => {
+    const moistureValue = parseFloat(point.soil_moisture.average);
+    
+    return (
+      <Marker key={`marker-${point.id}`} position={[point.latitude, point.longitude]}>
+        <Popup>
+          <div className="p-2">
+            <h3 className="font-semibold text-sm mb-2">{point.location_name}</h3>
+            <div className="space-y-1 text-xs">
+              <div>
+                <span className="font-medium">Soil Moisture:</span> {moistureValue.toFixed(3)} m³/m³
+              </div>
+              <div>
+                <span className="font-medium">Trend:</span> {point.soil_moisture.trend}
+              </div>
+              <div>
+                <span className="font-medium">Growth Potential:</span> {parseFloat(point.growth_potential.score).toFixed(1)}%
+              </div>
+              <div>
+                <span className="font-medium">Suitability:</span> {point.growth_potential.suitability}
+              </div>
+            </div>
+          </div>
+        </Popup>
+      </Marker>
+    );
+  });
+
+  return (
+    <>
+      {circles}
+      {markers}
+    </>
+  );
+};
 
 export const AnalysisMap = ({ analysisPoints, center = [22.1564, 85.5184], zoom = 12 }: AnalysisMapProps) => {
   // Return null if no data
@@ -73,52 +136,7 @@ export const AnalysisMap = ({ analysisPoints, center = [22.1564, 85.5184], zoom 
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <LayerGroup>
-          {validPoints.map((point) => {
-            const moistureValue = parseFloat(point.soil_moisture.average);
-            const moistureColor = getMoistureColor(moistureValue);
-            
-            return (
-              <Circle
-                key={`circle-${point.id}`}
-                center={[point.latitude, point.longitude]}
-                radius={500}
-                pathOptions={{
-                  color: moistureColor,
-                  fillColor: moistureColor,
-                  fillOpacity: 0.3,
-                }}
-              />
-            );
-          })}
-          {validPoints.map((point) => {
-            const moistureValue = parseFloat(point.soil_moisture.average);
-            
-            return (
-              <Marker key={`marker-${point.id}`} position={[point.latitude, point.longitude]}>
-                <Popup>
-                  <div className="p-2">
-                    <h3 className="font-semibold text-sm mb-2">{point.location_name}</h3>
-                    <div className="space-y-1 text-xs">
-                      <div>
-                        <span className="font-medium">Soil Moisture:</span> {moistureValue.toFixed(3)} m³/m³
-                      </div>
-                      <div>
-                        <span className="font-medium">Trend:</span> {point.soil_moisture.trend}
-                      </div>
-                      <div>
-                        <span className="font-medium">Growth Potential:</span> {parseFloat(point.growth_potential.score).toFixed(1)}%
-                      </div>
-                      <div>
-                        <span className="font-medium">Suitability:</span> {point.growth_potential.suitability}
-                      </div>
-                    </div>
-                  </div>
-                </Popup>
-              </Marker>
-            );
-          })}
-        </LayerGroup>
+        <MapContent points={validPoints} />
       </MapContainer>
     </div>
   );

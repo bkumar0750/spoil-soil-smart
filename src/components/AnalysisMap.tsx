@@ -78,38 +78,43 @@ export const AnalysisMap = ({ analysisPoints, center = [22.1564, 85.5184], zoom 
           const moistureColor = getMoistureColor(moistureValue);
           
           return (
-            <React.Fragment key={point.id}>
-              <Circle
-                center={[point.latitude, point.longitude]}
-                radius={500}
-                pathOptions={{
-                  color: moistureColor,
-                  fillColor: moistureColor,
-                  fillOpacity: 0.3,
-                }}
-              />
-              <Marker position={[point.latitude, point.longitude]}>
-                <Popup>
-                  <div className="p-2">
-                    <h3 className="font-semibold text-sm mb-2">{point.location_name}</h3>
-                    <div className="space-y-1 text-xs">
-                      <div>
-                        <span className="font-medium">Soil Moisture:</span> {moistureValue.toFixed(3)} m³/m³
-                      </div>
-                      <div>
-                        <span className="font-medium">Trend:</span> {point.soil_moisture.trend}
-                      </div>
-                      <div>
-                        <span className="font-medium">Growth Potential:</span> {parseFloat(point.growth_potential.score).toFixed(1)}%
-                      </div>
-                      <div>
-                        <span className="font-medium">Suitability:</span> {point.growth_potential.suitability}
-                      </div>
+            <Circle
+              key={`circle-${point.id}`}
+              center={[point.latitude, point.longitude]}
+              radius={500}
+              pathOptions={{
+                color: moistureColor,
+                fillColor: moistureColor,
+                fillOpacity: 0.3,
+              }}
+            />
+          );
+        })}
+        {validPoints.map((point) => {
+          const moistureValue = parseFloat(point.soil_moisture.average);
+          
+          return (
+            <Marker key={`marker-${point.id}`} position={[point.latitude, point.longitude]}>
+              <Popup>
+                <div className="p-2">
+                  <h3 className="font-semibold text-sm mb-2">{point.location_name}</h3>
+                  <div className="space-y-1 text-xs">
+                    <div>
+                      <span className="font-medium">Soil Moisture:</span> {moistureValue.toFixed(3)} m³/m³
+                    </div>
+                    <div>
+                      <span className="font-medium">Trend:</span> {point.soil_moisture.trend}
+                    </div>
+                    <div>
+                      <span className="font-medium">Growth Potential:</span> {parseFloat(point.growth_potential.score).toFixed(1)}%
+                    </div>
+                    <div>
+                      <span className="font-medium">Suitability:</span> {point.growth_potential.suitability}
                     </div>
                   </div>
-                </Popup>
-              </Marker>
-            </React.Fragment>
+                </div>
+              </Popup>
+            </Marker>
           );
         })}
       </MapContainer>

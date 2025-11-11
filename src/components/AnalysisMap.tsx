@@ -51,56 +51,52 @@ const MapContent = ({ points }: { points: AnalysisPoint[] }) => {
     }
   }, [points, map]);
 
-  const circles = points.map((point) => {
-    const moistureValue = parseFloat(point.soil_moisture.average);
-    const moistureColor = getMoistureColor(moistureValue);
-    
-    return (
-      <Circle
-        key={`circle-${point.id}`}
-        center={[point.latitude, point.longitude]}
-        radius={500}
-        pathOptions={{
-          color: moistureColor,
-          fillColor: moistureColor,
-          fillOpacity: 0.3,
-        }}
-      />
-    );
-  });
-
-  const markers = points.map((point) => {
-    const moistureValue = parseFloat(point.soil_moisture.average);
-    
-    return (
-      <Marker key={`marker-${point.id}`} position={[point.latitude, point.longitude]}>
-        <Popup>
-          <div className="p-2">
-            <h3 className="font-semibold text-sm mb-2">{point.location_name}</h3>
-            <div className="space-y-1 text-xs">
-              <div>
-                <span className="font-medium">Soil Moisture:</span> {moistureValue.toFixed(3)} m³/m³
-              </div>
-              <div>
-                <span className="font-medium">Trend:</span> {point.soil_moisture.trend}
-              </div>
-              <div>
-                <span className="font-medium">Growth Potential:</span> {parseFloat(point.growth_potential.score).toFixed(1)}%
-              </div>
-              <div>
-                <span className="font-medium">Suitability:</span> {point.growth_potential.suitability}
-              </div>
-            </div>
-          </div>
-        </Popup>
-      </Marker>
-    );
-  });
-
   return (
     <>
-      {circles}
-      {markers}
+      {points.map((point) => {
+        const moistureValue = parseFloat(point.soil_moisture.average);
+        const moistureColor = getMoistureColor(moistureValue);
+        
+        return (
+          <Circle
+            key={`circle-${point.id}`}
+            center={[point.latitude, point.longitude]}
+            radius={500}
+            pathOptions={{
+              color: moistureColor,
+              fillColor: moistureColor,
+              fillOpacity: 0.3,
+            }}
+          />
+        );
+      })}
+      {points.map((point) => {
+        const moistureValue = parseFloat(point.soil_moisture.average);
+        
+        return (
+          <Marker key={`marker-${point.id}`} position={[point.latitude, point.longitude]}>
+            <Popup>
+              <div className="p-2">
+                <h3 className="font-semibold text-sm mb-2">{point.location_name}</h3>
+                <div className="space-y-1 text-xs">
+                  <div>
+                    <span className="font-medium">Soil Moisture:</span> {moistureValue.toFixed(3)} m³/m³
+                  </div>
+                  <div>
+                    <span className="font-medium">Trend:</span> {point.soil_moisture.trend}
+                  </div>
+                  <div>
+                    <span className="font-medium">Growth Potential:</span> {parseFloat(point.growth_potential.score).toFixed(1)}%
+                  </div>
+                  <div>
+                    <span className="font-medium">Suitability:</span> {point.growth_potential.suitability}
+                  </div>
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        );
+      })}
     </>
   );
 };

@@ -1,5 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -32,77 +31,68 @@ interface AnalysisMapProps {
   zoom?: number;
 }
 
-// Function to get color based on soil moisture
 const getMoistureColor = (moisture: number) => {
-  if (moisture < 0.1) return '#ef4444'; // red - very dry
-  if (moisture < 0.15) return '#f97316'; // orange - dry
-  if (moisture < 0.2) return '#eab308'; // yellow - moderate
-  if (moisture < 0.25) return '#84cc16'; // lime - good
-  return '#22c55e'; // green - excellent
-};
-
-// Component that properly uses Leaflet context
-const MapContent = ({ points }: { points: AnalysisPoint[] }) => {
-  const map = useMap();
-
-  useEffect(() => {
-    if (points.length > 0 && points[0].latitude && points[0].longitude) {
-      map.setView([points[0].latitude, points[0].longitude], map.getZoom());
-    }
-  }, [points, map]);
-
-  return (
-    <>
-      {points.map((point) => {
-        const moistureValue = parseFloat(point.soil_moisture.average);
-        const moistureColor = getMoistureColor(moistureValue);
-        
-        return (
-          <Circle
-            key={`circle-${point.id}`}
-            center={[point.latitude, point.longitude]}
-            radius={500}
-            pathOptions={{
-              color: moistureColor,
-              fillColor: moistureColor,
-              fillOpacity: 0.3,
-            }}
-          />
-        );
-      })}
-      {points.map((point) => {
-        const moistureValue = parseFloat(point.soil_moisture.average);
-        
-        return (
-          <Marker key={`marker-${point.id}`} position={[point.latitude, point.longitude]}>
-            <Popup>
-              <div className="p-2">
-                <h3 className="font-semibold text-sm mb-2">{point.location_name}</h3>
-                <div className="space-y-1 text-xs">
-                  <div>
-                    <span className="font-medium">Soil Moisture:</span> {moistureValue.toFixed(3)} m³/m³
-                  </div>
-                  <div>
-                    <span className="font-medium">Trend:</span> {point.soil_moisture.trend}
-                  </div>
-                  <div>
-                    <span className="font-medium">Growth Potential:</span> {parseFloat(point.growth_potential.score).toFixed(1)}%
-                  </div>
-                  <div>
-                    <span className="font-medium">Suitability:</span> {point.growth_potential.suitability}
-                  </div>
-                </div>
-              </div>
-            </Popup>
-          </Marker>
-        );
-      })}
-    </>
-  );
+  if (moisture < 0.1) return '#ef4444';
+  if (moisture < 0.15) return '#f97316';
+  if (moisture < 0.2) return '#eab308';
+  if (moisture < 0.25) return '#84cc16';
+  return '#22c55e';
 };
 
 export const AnalysisMap = ({ analysisPoints, center = [22.1564, 85.5184], zoom = 12 }: AnalysisMapProps) => {
-  // Return null if no data
+  const mapRef = useRef<L.Map | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return;
+
+    const validPoints = (analysisPoints || []).filter(
+      p => p.latitude && p.longitude && p.soil_moisture && p.growth_potential
+    );
+
+    const mapCenter: L.LatLngExpression = validPoints.length > 0
+      ? [validPoints[0].latitude, validPoints[0].longitude]
+      : center;
+
+    const map = L.map(containerRef.current).setView(mapCenter, zoom);
+    mapRef.current = map;
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    validPoints.forEach((point) => {
+      const moistureValue = parseFloat(point.soil_moisture.average);
+      const color = getMoistureColor(moistureValue);
+
+      L.circle([point.latitude, point.longitude], {
+        radius: 500,
+        color,
+        fillColor: color,
+        fillOpacity: 0.3,
+      }).addTo(map);
+
+      L.marker([point.latitude, point.longitude])
+        .addTo(map)
+        .bindPopup(`
+          <div style="padding:8px">
+            <h3 style="font-weight:600;font-size:14px;margin-bottom:8px">${point.location_name}</h3>
+            <div style="font-size:12px;line-height:1.8">
+              <div><strong>Soil Moisture:</strong> ${moistureValue.toFixed(3)} m³/m³</div>
+              <div><strong>Trend:</strong> ${point.soil_moisture.trend}</div>
+              <div><strong>Growth Potential:</strong> ${parseFloat(point.growth_potential.score).toFixed(1)}%</div>
+              <div><strong>Suitability:</strong> ${point.growth_potential.suitability}</div>
+            </div>
+          </div>
+        `);
+    });
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, [analysisPoints, center, zoom]);
+
   if (!analysisPoints || analysisPoints.length === 0) {
     return (
       <div className="w-full h-[500px] rounded-lg overflow-hidden border flex items-center justify-center bg-muted">
@@ -111,29 +101,5 @@ export const AnalysisMap = ({ analysisPoints, center = [22.1564, 85.5184], zoom 
     );
   }
 
-  // Calculate center from first point if available
-  const mapCenter: [number, number] = analysisPoints.length > 0 && analysisPoints[0].latitude && analysisPoints[0].longitude
-    ? [analysisPoints[0].latitude, analysisPoints[0].longitude]
-    : center;
-
-  const validPoints = analysisPoints.filter(
-    point => point.latitude && point.longitude && point.soil_moisture && point.growth_potential
-  );
-
-  return (
-    <div className="w-full h-[500px] rounded-lg overflow-hidden border">
-      <MapContainer
-        center={mapCenter}
-        zoom={zoom}
-        className="w-full h-full"
-        scrollWheelZoom={true}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <MapContent points={validPoints} />
-      </MapContainer>
-    </div>
-  );
+  return <div ref={containerRef} className="w-full h-[500px] rounded-lg overflow-hidden border" />;
 };

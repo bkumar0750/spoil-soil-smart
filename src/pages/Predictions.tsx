@@ -10,10 +10,62 @@ import { MoistureChart } from "@/components/MoistureChart";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
+const DEMO_DATA = [
+  {
+    id: "demo-1",
+    latitude: 22.1564,
+    longitude: 85.5184,
+    location_name: "Jharsuguda Mine Site A",
+    soil_moisture: { average: "0.185", min: "0.121", max: "0.248", trend: "increasing" },
+    vegetation_indices: { ndvi: { average: "0.32", status: "Moderate", description: "Vegetation recovery in progress" }, evi: { average: "0.28", status: "Low-Moderate", description: "Early-stage canopy development" }, savi: { average: "0.30", status: "Moderate", description: "Adjusted for soil background" } },
+    soil_properties: { ph: "6.8", organicCarbon: "1.2%", texture: "Sandy Loam", bulkDensity: "1.45 g/cm³" },
+    growth_potential: { score: "72", suitability: "High", recommendedSpecies: ["Acacia nilotica", "Azadirachta indica"], limitations: ["Low organic matter"], recommendations: ["Add compost mulch"] },
+    analyzed_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+    created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+  },
+  {
+    id: "demo-2",
+    latitude: 22.1720,
+    longitude: 85.5350,
+    location_name: "Jharsuguda Mine Site B",
+    soil_moisture: { average: "0.142", min: "0.089", max: "0.195", trend: "stable" },
+    vegetation_indices: { ndvi: { average: "0.18", status: "Low", description: "Sparse vegetation cover" }, evi: { average: "0.15", status: "Low", description: "Limited canopy" }, savi: { average: "0.17", status: "Low", description: "High soil reflectance" } },
+    soil_properties: { ph: "5.9", organicCarbon: "0.6%", texture: "Loamy Sand", bulkDensity: "1.62 g/cm³" },
+    growth_potential: { score: "45", suitability: "Moderate", recommendedSpecies: ["Leucaena leucocephala", "Cassia siamea"], limitations: ["Low moisture", "Acidic soil"], recommendations: ["Lime application", "Drip irrigation"] },
+    analyzed_at: new Date(Date.now() - 5 * 86400000).toISOString(),
+    created_at: new Date(Date.now() - 5 * 86400000).toISOString(),
+  },
+  {
+    id: "demo-3",
+    latitude: 22.1400,
+    longitude: 85.5000,
+    location_name: "Sundargarh Reclamation Zone",
+    soil_moisture: { average: "0.263", min: "0.198", max: "0.321", trend: "increasing" },
+    vegetation_indices: { ndvi: { average: "0.48", status: "Good", description: "Healthy vegetation growth" }, evi: { average: "0.42", status: "Good", description: "Dense canopy forming" }, savi: { average: "0.45", status: "Good", description: "Strong vegetation signal" } },
+    soil_properties: { ph: "7.2", organicCarbon: "2.1%", texture: "Clay Loam", bulkDensity: "1.32 g/cm³" },
+    growth_potential: { score: "88", suitability: "Very High", recommendedSpecies: ["Dalbergia sissoo", "Tectona grandis", "Acacia nilotica"], limitations: ["Seasonal waterlogging"], recommendations: ["Raised bed planting", "Drainage channels"] },
+    analyzed_at: new Date(Date.now() - 1 * 86400000).toISOString(),
+    created_at: new Date(Date.now() - 1 * 86400000).toISOString(),
+  },
+  {
+    id: "demo-4",
+    latitude: 22.1650,
+    longitude: 85.4850,
+    location_name: "IB Valley Coal Field",
+    soil_moisture: { average: "0.098", min: "0.062", max: "0.134", trend: "decreasing" },
+    vegetation_indices: { ndvi: { average: "0.12", status: "Very Low", description: "Barren overburden" }, evi: { average: "0.09", status: "Very Low", description: "No significant vegetation" }, savi: { average: "0.11", status: "Very Low", description: "Dominated by soil signal" } },
+    soil_properties: { ph: "4.8", organicCarbon: "0.3%", texture: "Sandy", bulkDensity: "1.78 g/cm³" },
+    growth_potential: { score: "22", suitability: "Low", recommendedSpecies: ["Leucaena leucocephala"], limitations: ["Very low moisture", "Highly acidic", "Poor structure"], recommendations: ["Heavy liming", "Organic amendment", "Pioneer species first"] },
+    analyzed_at: new Date(Date.now() - 7 * 86400000).toISOString(),
+    created_at: new Date(Date.now() - 7 * 86400000).toISOString(),
+  },
+];
+
 const Predictions = () => {
   const [analysisData, setAnalysisData] = useState<any[]>([]);
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usingDemo, setUsingDemo] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -34,15 +86,18 @@ const Predictions = () => {
         .limit(50);
 
       if (error) throw error;
-      
-      setAnalysisData(data || []);
+
+      if (data && data.length > 0) {
+        setAnalysisData(data);
+        setUsingDemo(false);
+      } else {
+        setAnalysisData(DEMO_DATA);
+        setUsingDemo(true);
+      }
     } catch (error) {
       console.error('Error fetching analysis data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load analysis data",
-        variant: "destructive",
-      });
+      setAnalysisData(DEMO_DATA);
+      setUsingDemo(true);
     } finally {
       setLoading(false);
     }
@@ -169,6 +224,23 @@ const Predictions = () => {
         </p>
       </div>
 
+      {/* Demo Data Banner */}
+      {usingDemo && (
+        <Card className="border-accent/50 bg-accent/5">
+          <CardContent className="pt-6 pb-4">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-accent flex-shrink-0" />
+              <div>
+                <p className="font-medium text-sm">Viewing Demo Data</p>
+                <p className="text-xs text-muted-foreground">
+                  These are sample analysis results for demonstration. Run an analysis from the Home page to see real data.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Filter and Export Controls */}
       <Card>
         <CardContent className="pt-6">
@@ -176,6 +248,7 @@ const Predictions = () => {
             <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center flex-1">
               <div className="text-sm text-muted-foreground">
                 Showing {filteredData.length} of {analysisData.length} records
+                {usingDemo && <Badge variant="secondary" className="ml-2">Demo</Badge>}
               </div>
             </div>
 

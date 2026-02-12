@@ -234,6 +234,68 @@ const About = () => {
           </div>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <BookOpen className="h-5 w-5 text-primary" />
+            <div>
+              <CardTitle>Key References</CardTitle>
+              <CardDescription>Literature supporting this research</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Card className="border-2 border-primary/20 bg-primary/5">
+            <CardContent className="pt-4 text-sm">
+              <p className="font-medium">Kashyap, R., & Kuttippurath, J. (2024)</p>
+              <p className="text-muted-foreground mt-1">
+                Warming-induced soil moisture stress threatens food security in India. <em>Environmental Science and Pollution Research</em>, 31, 59202–59218.
+              </p>
+              <a href="https://doi.org/10.1007/s11356-024-35107-7" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs mt-2 inline-block">
+                https://doi.org/10.1007/s11356-024-35107-7
+              </a>
+              <div className="mt-3 flex flex-wrap gap-1">
+                <Badge variant="secondary">Soil Moisture Drying</Badge>
+                <Badge variant="secondary">Random Forest</Badge>
+                <Badge variant="secondary">CMIP6</Badge>
+                <Badge variant="secondary">Food Security</Badge>
+                <Badge variant="secondary">India</Badge>
+              </div>
+              <p className="text-muted-foreground mt-3 text-xs">
+                <strong>Key findings used:</strong> Temperature is the dominant driver of SM variability (30.76%), monsoon SM declined 4.5%, 
+                warming rate of 0.59°C/decade, and 1-month Granger causality lag between SM stress and productivity loss.
+              </p>
+            </CardContent>
+          </Card>
+          <div className="grid gap-3 md:grid-cols-2 text-sm">
+            <Card className="border">
+              <CardContent className="pt-4">
+                <p className="font-medium">Humphrey, V., et al. (2021)</p>
+                <p className="text-muted-foreground text-xs mt-1">Soil moisture–atmosphere feedback dominates land carbon uptake variability. <em>Nature</em>.</p>
+              </CardContent>
+            </Card>
+            <Card className="border">
+              <CardContent className="pt-4">
+                <p className="font-medium">Lal, R., et al. (2023)</p>
+                <p className="text-muted-foreground text-xs mt-1">Global soil moisture drying trends and driving mechanisms in recent decades.</p>
+              </CardContent>
+            </Card>
+            <Card className="border">
+              <CardContent className="pt-4">
+                <p className="font-medium">Green, J.K., et al. (2019)</p>
+                <p className="text-muted-foreground text-xs mt-1">Large influence of soil moisture on long-term terrestrial carbon uptake. <em>Nature</em>.</p>
+              </CardContent>
+            </Card>
+            <Card className="border">
+              <CardContent className="pt-4">
+                <p className="font-medium">Krishnamurthy, R.P.K., et al. (2022)</p>
+                <p className="text-muted-foreground text-xs mt-1">The role of soil moisture in crop yield variability and food security.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

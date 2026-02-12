@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Leaf, Database, Brain, Map, Info } from "lucide-react";
+import { Leaf, Database, Brain, Map, CloudSun, Info } from "lucide-react";
 
 const Navbar = () => {
   const location = useLocation();
@@ -12,6 +12,7 @@ const Navbar = () => {
     { path: "/data", label: "Data Overview", icon: Database },
     { path: "/model", label: "Model Training", icon: Brain },
     { path: "/predictions", label: "Predictions", icon: Map },
+    { path: "/climate", label: "Climate", icon: CloudSun },
     { path: "/about", label: "About", icon: Info },
   ];
 

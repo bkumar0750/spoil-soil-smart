@@ -32,6 +32,16 @@ serve(async (req) => {
     console.log('GEE credentials available:', !!serviceAccountEmail && !!privateKey);
 
     // For demo purposes, generate synthetic but realistic data based on the research paper
+    // Temperature is the dominant driver of SM variability (30.76%), followed by
+    // precipitation (26.34%), ET (26.08%), and surface greenness (16.82%)
+    // Based on: Kashyap & Kuttippurath (2024), Env. Sci. Pollution Res.
+    
+    // Simulate temperature-driven SM stress: higher temp = lower SM
+    const baseTemp = 28 + Math.random() * 8; // 28-36°C range for Indian mine sites
+    const tempEffect = Math.max(0, 1 - (baseTemp - 28) * 0.03); // ~3% SM loss per °C above 28
+    const precipEffect = 0.7 + Math.random() * 0.3; // rainfall contribution
+    const baseSM = 0.25 * tempEffect * precipEffect; // base SM adjusted by drivers
+
     const soilMoistureData = {
       location: {
         latitude,
@@ -44,11 +54,21 @@ serve(async (req) => {
         end: endDate
       },
       soilMoisture: {
-        average: (Math.random() * 0.3 + 0.1).toFixed(3), // 0.1-0.4 m³/m³
-        min: (Math.random() * 0.1).toFixed(3),
-        max: (Math.random() * 0.2 + 0.4).toFixed(3),
+        average: baseSM.toFixed(3),
+        min: (baseSM * 0.6).toFixed(3),
+        max: (baseSM * 1.4).toFixed(3),
         unit: 'm³/m³',
-        trend: Math.random() > 0.5 ? 'increasing' : 'stable'
+        trend: baseTemp > 32 ? 'decreasing' : (Math.random() > 0.5 ? 'increasing' : 'stable'),
+        warmingStress: baseTemp > 32 ? 'High' : baseTemp > 30 ? 'Moderate' : 'Low',
+      },
+      climateDrivers: {
+        temperature: { value: baseTemp.toFixed(1) + '°C', importance: '30.76%', effect: 'negative' },
+        precipitation: { importance: '26.34%', effect: 'positive' },
+        evapotranspiration: { importance: '26.08%', effect: 'negative' },
+        surfaceGreenness: { importance: '16.82%', effect: 'positive' },
+        warmingRate: '0.59°C/decade',
+        soilHeatFluxTrend: '0.16 W/m²/decade',
+        temporalLag: '1 month (Granger Causality)',
       },
       vegetationIndices: {
         ndvi: {

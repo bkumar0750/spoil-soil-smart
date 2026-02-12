@@ -13,6 +13,16 @@ const DataOverview = () => {
     { name: "SRTM DEM", resolution: "30m", bands: "Elevation", temporal: "Static" },
   ];
 
+  const climateDataSources = [
+    { name: "ESA CCI Soil Moisture", resolution: "0.25° × 0.25°", source: "esa-soilmoisture-cci.org", description: "Global SM from passive/active microwave" },
+    { name: "MODIS LULC, NDVI, GPP, ET", resolution: "500 m", source: "lpdaacsvc.cr.usgs.gov", description: "Land cover, vegetation indices, productivity" },
+    { name: "GPM Level-3 Precipitation", resolution: "0.1° × 0.1°", source: "daac.gsfc.nasa.gov", description: "High-res global precipitation" },
+    { name: "GLDAS SM & Temperature", resolution: "0.25° × 0.25°", source: "daac.gsfc.nasa.gov", description: "Land surface model reanalysis" },
+    { name: "FLDAS Soil Heat Flux", resolution: "0.1° × 0.25°", source: "daac.gsfc.nasa.gov", description: "Famine early-warning land data" },
+    { name: "IMD Precipitation", resolution: "0.25° × 0.25°", source: "imdpune.gov.in", description: "India-specific gridded rainfall" },
+    { name: "IMD Temperature", resolution: "1° × 1°", source: "imdpune.gov.in", description: "India-specific gridded temperature" },
+  ];
+
   const fieldParameters = [
     { category: "Soil Physical", params: ["Moisture (0-10cm, 10-30cm, 30-60cm)", "Texture (sand/silt/clay %)", "Bulk density", "Porosity", "Infiltration rate"] },
     { category: "Soil Chemical", params: ["pH", "Electrical conductivity", "Organic carbon", "N, P, K", "Heavy metals"] },
@@ -84,6 +94,37 @@ const DataOverview = () => {
                       </CardContent>
                     </Card>
                   ))}
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-4">Climate & Reanalysis Data Sources</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Additional datasets from Kashyap & Kuttippurath (2024) for SM dynamics and climate analysis.
+                </p>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-3 font-medium">Dataset</th>
+                        <th className="text-left p-3 font-medium">Resolution</th>
+                        <th className="text-left p-3 font-medium">Description</th>
+                        <th className="text-left p-3 font-medium">Source</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {climateDataSources.map((ds, i) => (
+                        <tr key={i} className="border-b last:border-0">
+                          <td className="p-3 font-medium">{ds.name}</td>
+                          <td className="p-3"><Badge variant="outline">{ds.resolution}</Badge></td>
+                          <td className="p-3 text-muted-foreground">{ds.description}</td>
+                          <td className="p-3">
+                            <a href={`https://${ds.source}/`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs">{ds.source}</a>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </CardContent>

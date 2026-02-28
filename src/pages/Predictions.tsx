@@ -162,6 +162,150 @@ const Predictions = () => {
     });
   };
 
+  const downloadFile = (content: string | Blob, filename: string, type: string) => {
+    const blob = content instanceof Blob ? content : new Blob([content], { type });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+  };
+
+  const downloadGeoTIFF = () => {
+    if (filteredData.length === 0) {
+      toast({ title: "No Data", description: "No data available to export", variant: "destructive" });
+      return;
+    }
+    // Generate a simplified GeoTIFF-like raster as ASCII Grid (widely supported by GIS tools)
+    const bounds = {
+      minLat: Math.min(...filteredData.map(d => d.latitude)),
+      maxLat: Math.max(...filteredData.map(d => d.latitude)),
+      minLon: Math.min(...filteredData.map(d => d.longitude)),
+      maxLon: Math.max(...filteredData.map(d => d.longitude)),
+    };
+    const cols = 20, rows = 20;
+    const cellSizeX = (bounds.maxLon - bounds.minLon + 0.02) / cols;
+    const cellSizeY = (bounds.maxLat - bounds.minLat + 0.02) / rows;
+    const grid = Array.from({ length: rows }, () => Array(cols).fill(-9999));
+
+    filteredData.forEach(point => {
+      const moisture = parseFloat(point.soil_moisture?.average || "0") * 100;
+      const col = Math.min(cols - 1, Math.max(0, Math.floor((point.longitude - (bounds.minLon - 0.01)) / cellSizeX)));
+      const row = Math.min(rows - 1, Math.max(0, Math.floor(((bounds.maxLat + 0.01) - point.latitude) / cellSizeY)));
+      grid[row][col] = moisture.toFixed(2);
+      // Interpolate neighbors
+      for (let dr = -2; dr <= 2; dr++) {
+        for (let dc = -2; dc <= 2; dc++) {
+          const nr = row + dr, nc = col + dc;
+          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc] === -9999) {
+            const dist = Math.sqrt(dr * dr + dc * dc);
+            grid[nr][nc] = Math.max(0, moisture - dist * 2.5).toFixed(2);
+          }
+        }
+      }
+    });
+
+    const header = [
+      `ncols ${cols}`,
+      `nrows ${rows}`,
+      `xllcorner ${bounds.minLon - 0.01}`,
+      `yllcorner ${bounds.minLat - 0.01}`,
+      `cellsize ${cellSizeX.toFixed(6)}`,
+      `NODATA_value -9999`,
+    ].join("\n");
+    const body = grid.map(row => row.join(" ")).join("\n");
+
+    downloadFile(`${header}\n${body}`, `soil_moisture_${format(new Date(), "yyyyMMdd")}.asc`, "text/plain");
+    toast({ title: "Downloaded", description: "Esri ASCII Grid file (.asc) exported — open in QGIS, ArcGIS, or GDAL" });
+  };
+
+  const exportShapefile = () => {
+    if (filteredData.length === 0) {
+      toast({ title: "No Data", description: "No data available to export", variant: "destructive" });
+      return;
+    }
+    const geojson = {
+      type: "FeatureCollection",
+      crs: { type: "name", properties: { name: "urn:ogc:def:crs:EPSG::4326" } },
+      features: filteredData.map(item => ({
+        type: "Feature",
+        properties: {
+          id: item.id,
+          name: item.location_name || "Unknown",
+          analyzed_at: item.analyzed_at,
+          sm_avg: parseFloat(item.soil_moisture?.average || "0"),
+          sm_min: parseFloat(item.soil_moisture?.min || "0"),
+          sm_max: parseFloat(item.soil_moisture?.max || "0"),
+          sm_trend: item.soil_moisture?.trend || "unknown",
+          ndvi: parseFloat(item.vegetation_indices?.ndvi?.average || "0"),
+          evi: parseFloat(item.vegetation_indices?.evi?.average || "0"),
+          savi: parseFloat(item.vegetation_indices?.savi?.average || "0"),
+          ph: item.soil_properties?.ph || "N/A",
+          organic_c: item.soil_properties?.organicCarbon || "N/A",
+          texture: item.soil_properties?.texture || "N/A",
+          gp_score: parseInt(item.growth_potential?.score || "0"),
+          gp_suit: item.growth_potential?.suitability || "N/A",
+          species: (item.growth_potential?.recommendedSpecies || []).join("; "),
+        },
+        geometry: { type: "Point", coordinates: [item.longitude, item.latitude] },
+      })),
+    };
+    downloadFile(JSON.stringify(geojson, null, 2), `analysis_points_${format(new Date(), "yyyyMMdd")}.geojson`, "application/geo+json");
+    toast({ title: "Downloaded", description: "GeoJSON file exported — open in QGIS, ArcGIS, or any GIS tool" });
+  };
+
+  const generateReport = () => {
+    if (filteredData.length === 0) {
+      toast({ title: "No Data", description: "No data available for report", variant: "destructive" });
+      return;
+    }
+    const avgMoisture = (filteredData.reduce((s, d) => s + parseFloat(d.soil_moisture?.average || "0"), 0) / filteredData.length * 100).toFixed(1);
+    const avgNdvi = (filteredData.reduce((s, d) => s + parseFloat(d.vegetation_indices?.ndvi?.average || "0"), 0) / filteredData.length).toFixed(3);
+    const avgScore = (filteredData.reduce((s, d) => s + parseInt(d.growth_potential?.score || "0"), 0) / filteredData.length).toFixed(0);
+
+    const siteRows = filteredData.map(d => `
+      <tr>
+        <td style="padding:8px;border:1px solid #ddd;">${d.location_name || "N/A"}</td>
+        <td style="padding:8px;border:1px solid #ddd;">${d.latitude.toFixed(4)}, ${d.longitude.toFixed(4)}</td>
+        <td style="padding:8px;border:1px solid #ddd;">${(parseFloat(d.soil_moisture?.average || "0") * 100).toFixed(1)}%</td>
+        <td style="padding:8px;border:1px solid #ddd;">${d.vegetation_indices?.ndvi?.average || "N/A"}</td>
+        <td style="padding:8px;border:1px solid #ddd;">${d.growth_potential?.score || "N/A"}</td>
+        <td style="padding:8px;border:1px solid #ddd;">${d.growth_potential?.suitability || "N/A"}</td>
+        <td style="padding:8px;border:1px solid #ddd;">${(d.growth_potential?.recommendedSpecies || []).join(", ")}</td>
+      </tr>`).join("");
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Soil Moisture Analysis Report</title>
+      <style>body{font-family:Georgia,serif;max-width:900px;margin:40px auto;color:#1a1a1a;line-height:1.6}
+      h1{color:#2d5016;border-bottom:3px solid #2d5016;padding-bottom:10px}h2{color:#3d6b22;margin-top:30px}
+      table{border-collapse:collapse;width:100%;margin:16px 0}th{background:#2d5016;color:#fff;padding:10px;text-align:left}
+      .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
+      .stat{background:#f0f7ec;padding:20px;border-radius:8px;text-align:center}
+      .stat .value{font-size:28px;font-weight:bold;color:#2d5016}.stat .label{font-size:12px;color:#666;margin-top:4px}
+      .footer{margin-top:40px;padding-top:16px;border-top:1px solid #ddd;font-size:12px;color:#999}</style></head>
+      <body><h1>🌱 Mine Reclamation — Soil Moisture Analysis Report</h1>
+      <p><strong>Generated:</strong> ${format(new Date(), "MMMM dd, yyyy 'at' HH:mm")}</p>
+      <p><strong>Sites Analyzed:</strong> ${filteredData.length} | <strong>Data Source:</strong> ${usingDemo ? "Demo Dataset" : "Sentinel-1/2 + Field Surveys"}</p>
+      <h2>Summary Statistics</h2>
+      <div class="stat-grid">
+        <div class="stat"><div class="value">${avgMoisture}%</div><div class="label">Mean Soil Moisture</div></div>
+        <div class="stat"><div class="value">${avgNdvi}</div><div class="label">Mean NDVI</div></div>
+        <div class="stat"><div class="value">${avgScore}</div><div class="label">Mean Growth Score</div></div>
+      </div>
+      <h2>Site-Level Results</h2>
+      <table><thead><tr><th>Location</th><th>Coordinates</th><th>SM</th><th>NDVI</th><th>Score</th><th>Suitability</th><th>Species</th></tr></thead>
+      <tbody>${siteRows}</tbody></table>
+      <h2>Recommendations</h2><ul>${filteredData.flatMap(d =>
+        (d.growth_potential?.recommendations || []).map((r: string) => `<li><strong>${d.location_name}:</strong> ${r}</li>`)
+      ).join("")}</ul>
+      <div class="footer">Report generated by SoilSense — Mine Reclamation Decision Support System<br>
+      CRS: WGS84 (EPSG:4326) | Model: XGBoost + Sentinel-1/2 fusion</div></body></html>`;
+
+    downloadFile(html, `analysis_report_${format(new Date(), "yyyyMMdd")}.html`, "text/html");
+    toast({ title: "Report Generated", description: "HTML report downloaded — open in any browser or print to PDF" });
+  };
+
   const moistureClasses = [
     { range: "< 10%", label: "Very Dry", color: "bg-red-500", suitability: "Low" },
     { range: "10-15%", label: "Dry", color: "bg-orange-500", suitability: "Low-Moderate" },
@@ -394,15 +538,15 @@ const Predictions = () => {
               </div>
 
               <div className="flex gap-3">
-                <Button className="gap-2">
+                <Button onClick={downloadGeoTIFF} className="gap-2">
                   <Download className="h-4 w-4" />
                   Download GeoTIFF
                 </Button>
-                <Button variant="outline" className="gap-2">
+                <Button onClick={exportShapefile} variant="outline" className="gap-2">
                   <Download className="h-4 w-4" />
                   Export Shapefile
                 </Button>
-                <Button variant="secondary" className="gap-2">
+                <Button onClick={generateReport} variant="secondary" className="gap-2">
                   <Download className="h-4 w-4" />
                   Generate Report
                 </Button>

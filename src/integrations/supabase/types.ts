@@ -53,6 +53,81 @@ export type Database = {
         }
         Relationships: []
       }
+      training_data: {
+        Row: {
+          created_at: string
+          dataset_name: string
+          date: string
+          id: string
+          lst: number | null
+          ndvi: number | null
+          rainfall: number | null
+          site_name: string
+          slope: number | null
+          soil_moisture: number | null
+          twi: number | null
+        }
+        Insert: {
+          created_at?: string
+          dataset_name: string
+          date: string
+          id?: string
+          lst?: number | null
+          ndvi?: number | null
+          rainfall?: number | null
+          site_name?: string
+          slope?: number | null
+          soil_moisture?: number | null
+          twi?: number | null
+        }
+        Update: {
+          created_at?: string
+          dataset_name?: string
+          date?: string
+          id?: string
+          lst?: number | null
+          ndvi?: number | null
+          rainfall?: number | null
+          site_name?: string
+          slope?: number | null
+          soil_moisture?: number | null
+          twi?: number | null
+        }
+        Relationships: []
+      }
+      training_runs: {
+        Row: {
+          created_at: string
+          dataset_name: string
+          feature_importance: Json
+          id: string
+          metrics: Json
+          model_name: string
+          predictions: Json
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          dataset_name: string
+          feature_importance?: Json
+          id?: string
+          metrics?: Json
+          model_name: string
+          predictions?: Json
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          dataset_name?: string
+          feature_importance?: Json
+          id?: string
+          metrics?: Json
+          model_name?: string
+          predictions?: Json
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

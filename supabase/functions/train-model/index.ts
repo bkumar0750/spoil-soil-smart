@@ -23,7 +23,9 @@ serve(async (req) => {
   }
 
   try {
-    const { data: trainingData, datasetName } = await req.json();
+    const body = await req.json();
+    const trainingData = body.data || body.trainingData;
+    const datasetName = body.datasetName;
 
     console.log(`Training model with ${trainingData.length} rows for dataset: ${datasetName}`);
 

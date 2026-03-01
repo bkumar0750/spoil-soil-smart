@@ -53,6 +53,57 @@ export type Database = {
         }
         Relationships: []
       }
+      mine_sites: {
+        Row: {
+          completeness_pct: number | null
+          country: string | null
+          created_at: string
+          data_quality_score: number | null
+          dataset_status: string | null
+          id: string
+          latitude: number | null
+          location: string | null
+          longitude: number | null
+          mine_type: string | null
+          name: string
+          total_records: number | null
+          updated_at: string
+          validation_report: Json | null
+        }
+        Insert: {
+          completeness_pct?: number | null
+          country?: string | null
+          created_at?: string
+          data_quality_score?: number | null
+          dataset_status?: string | null
+          id?: string
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          mine_type?: string | null
+          name: string
+          total_records?: number | null
+          updated_at?: string
+          validation_report?: Json | null
+        }
+        Update: {
+          completeness_pct?: number | null
+          country?: string | null
+          created_at?: string
+          data_quality_score?: number | null
+          dataset_status?: string | null
+          id?: string
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          mine_type?: string | null
+          name?: string
+          total_records?: number | null
+          updated_at?: string
+          validation_report?: Json | null
+        }
+        Relationships: []
+      }
       training_data: {
         Row: {
           created_at: string
@@ -60,6 +111,7 @@ export type Database = {
           date: string
           id: string
           lst: number | null
+          mine_site_id: string | null
           ndvi: number | null
           rainfall: number | null
           site_name: string
@@ -73,6 +125,7 @@ export type Database = {
           date: string
           id?: string
           lst?: number | null
+          mine_site_id?: string | null
           ndvi?: number | null
           rainfall?: number | null
           site_name?: string
@@ -86,6 +139,7 @@ export type Database = {
           date?: string
           id?: string
           lst?: number | null
+          mine_site_id?: string | null
           ndvi?: number | null
           rainfall?: number | null
           site_name?: string
@@ -93,7 +147,15 @@ export type Database = {
           soil_moisture?: number | null
           twi?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "training_data_mine_site_id_fkey"
+            columns: ["mine_site_id"]
+            isOneToOne: false
+            referencedRelation: "mine_sites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       training_runs: {
         Row: {

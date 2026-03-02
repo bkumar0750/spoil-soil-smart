@@ -1,4 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import SatelliteTab from "@/components/data-overview/SatelliteTab";
 import FieldDataTab from "@/components/data-overview/FieldDataTab";
 import DerivedIndicesTab from "@/components/data-overview/DerivedIndicesTab";
@@ -8,11 +9,12 @@ import MLTrainingTab from "@/components/data-overview/MLTrainingTab";
 
 const DataOverview = () => {
   return (
-    <div className="container py-12 space-y-8">
-      <div className="space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight">Data Overview</h1>
-        <p className="text-lg text-muted-foreground max-w-3xl">
-          Comprehensive multi-source dataset combining satellite remote sensing, field measurements, derived indices, and ML training pipelines for soil moisture prediction and reclamation suitability analysis.
+    <div className="container py-10 md:py-16 space-y-8">
+      <div className="space-y-3">
+        <Badge variant="outline" className="mb-1">Datasets</Badge>
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Data Overview</h1>
+        <p className="text-muted-foreground max-w-3xl">
+          Multi-source dataset combining satellite remote sensing, field measurements, derived indices, and ML training pipelines for soil moisture prediction.
         </p>
       </div>
 

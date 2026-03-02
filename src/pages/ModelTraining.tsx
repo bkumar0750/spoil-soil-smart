@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 import MineSelector from "@/components/MineSelector";
 import AddMineForm from "@/components/AddMineForm";
 
@@ -8,10 +9,11 @@ const ModelTraining = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="container py-12 space-y-8">
-      <div className="space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight">Model Training</h1>
-        <p className="text-lg text-muted-foreground max-w-3xl">
+    <div className="container py-10 md:py-16 space-y-8">
+      <div className="space-y-3">
+        <Badge variant="outline" className="mb-1">ML Pipeline</Badge>
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Model Training</h1>
+        <p className="text-muted-foreground max-w-3xl">
           Upload training data for any mine site worldwide. Each dataset is validated for quality and used to train soil moisture prediction models independently.
         </p>
       </div>

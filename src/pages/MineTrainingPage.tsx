@@ -34,13 +34,11 @@ const MineTrainingPage = () => {
 
   useEffect(() => {
     if (isJharia) {
-      // Load pre-bundled Jharia data
       fetch('/data/jharia-training-data.csv')
         .then(res => res.text())
         .then(text => setCsvData(parseCSV(text)))
         .catch(err => console.error('Failed to load CSV:', err));
     } else if (mineId) {
-      // Load from database
       loadMineData(mineId);
     }
     loadPastRuns();
@@ -49,23 +47,16 @@ const MineTrainingPage = () => {
   const loadMineData = async (id: string) => {
     const { data: mine } = await supabase.from('mine_sites').select('*').eq('id', id).single();
     if (mine) setMineName((mine as any).name);
-
     const { data: rows } = await supabase.from('training_data').select('*').eq('mine_site_id', id).order('date');
     if (rows) {
       setCsvData(rows.map(r => ({
-        date: r.date,
-        lst: r.lst,
-        ndvi: r.ndvi,
-        rainfall: r.rainfall,
-        slope: r.slope,
-        soil_moisture: r.soil_moisture,
-        twi: r.twi,
+        date: r.date, lst: r.lst, ndvi: r.ndvi, rainfall: r.rainfall,
+        slope: r.slope, soil_moisture: r.soil_moisture, twi: r.twi,
       })));
     }
   };
 
   const loadPastRuns = async () => {
-    const datasetFilter = isJharia ? 'Jharia_2015_2024' : `%_dataset`;
     const query = supabase.from('training_runs').select('*').order('created_at', { ascending: false }).limit(5);
     if (isJharia) {
       query.eq('dataset_name', 'Jharia_2015_2024');
@@ -112,19 +103,20 @@ const MineTrainingPage = () => {
   });
 
   return (
-    <div className="container py-12 space-y-8">
-      <div className="flex items-center gap-4">
+    <div className="container py-10 md:py-16 space-y-8">
+      <div className="flex items-center gap-3">
         <Link to="/model">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" /> All Mines
+          <Button variant="ghost" size="sm" className="gap-2">
+            <ArrowLeft className="h-4 w-4" /> All Mines
           </Button>
         </Link>
+        <Badge variant="outline">ML Pipeline</Badge>
       </div>
 
       <div className="space-y-2">
-        <h1 className="text-4xl font-bold tracking-tight">Model Training — {mineName}</h1>
-        <p className="text-lg text-muted-foreground">
-          {csvData.length} observations | {withSM.length} with soil moisture | {withoutSM.length} to predict
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{mineName}</h1>
+        <p className="text-muted-foreground">
+          {csvData.length} observations · {withSM.length} with soil moisture · {withoutSM.length} to predict
         </p>
       </div>
 
@@ -141,14 +133,12 @@ const MineTrainingPage = () => {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Database className="h-5 w-5" />
                 </div>
                 <div>
                   <CardTitle>{mineName} Dataset</CardTitle>
-                  <CardDescription>
-                    {csvData.length} monthly observations | {withSM.length} with SM | {withoutSM.length} to predict
-                  </CardDescription>
+                  <CardDescription>{csvData.length} monthly observations · {withSM.length} with SM · {withoutSM.length} to predict</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -162,24 +152,23 @@ const MineTrainingPage = () => {
                   { label: "SM Range", value: withSM.length > 0 ? `${Math.min(...withSM.map(r => r.soil_moisture!)).toFixed(1)}–${Math.max(...withSM.map(r => r.soil_moisture!)).toFixed(1)}` : 'N/A' },
                   { label: "TWI", value: `${csvData[0]?.twi?.toFixed(1)}` },
                 ].map((s, i) => (
-                  <div key={i} className="p-3 rounded-lg bg-muted/50">
-                    <p className="text-xs text-muted-foreground">{s.label}</p>
-                    <p className="font-bold text-sm">{s.value}</p>
+                  <div key={i} className="p-3 rounded-lg bg-muted/40">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{s.label}</p>
+                    <p className="font-bold text-sm mt-0.5">{s.value}</p>
                   </div>
-                )) : <p className="col-span-6 text-muted-foreground">Loading data...</p>}
+                )) : <p className="col-span-6 text-muted-foreground text-sm">Loading data...</p>}
               </div>
             </CardContent>
           </Card>
 
-          {/* Charts */}
           {csvData.length > 0 && (
             <>
               <Card>
-                <CardHeader><CardTitle className="text-lg">Soil Moisture & NDVI Time Series</CardTitle></CardHeader>
+                <CardHeader className="pb-3"><CardTitle className="text-base">Soil Moisture & NDVI Time Series</CardTitle></CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
                     <RechartsLineChart data={timeSeriesData}>
-                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                       <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={5} />
                       <YAxis yAxisId="sm" domain={[0, 30]} label={{ value: 'SM (%)', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} />
                       <YAxis yAxisId="ndvi" orientation="right" domain={[0, 0.8]} label={{ value: 'NDVI', angle: 90, position: 'insideRight', style: { fontSize: 11 } }} />
@@ -193,11 +182,11 @@ const MineTrainingPage = () => {
                 </CardContent>
               </Card>
               <Card>
-                <CardHeader><CardTitle className="text-lg">LST & Rainfall Time Series</CardTitle></CardHeader>
+                <CardHeader className="pb-3"><CardTitle className="text-base">LST & Rainfall Time Series</CardTitle></CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
                     <RechartsLineChart data={timeSeriesData}>
-                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                       <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={5} />
                       <YAxis yAxisId="lst" domain={[15, 50]} label={{ value: 'LST (°C)', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} />
                       <YAxis yAxisId="rain" orientation="right" domain={[0, 800]} label={{ value: 'Rainfall (mm)', angle: 90, position: 'insideRight', style: { fontSize: 11 } }} />
@@ -212,35 +201,34 @@ const MineTrainingPage = () => {
             </>
           )}
 
-          {/* Data Table */}
           <Card>
-            <CardHeader><CardTitle className="text-lg">Data Preview (first 20 rows)</CardTitle></CardHeader>
+            <CardHeader className="pb-3"><CardTitle className="text-base">Data Preview (first 20 rows)</CardTitle></CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
                       {['Date', 'LST (°C)', 'NDVI', 'Rainfall', 'Slope', 'SM', 'TWI'].map(h => (
-                        <th key={h} className="text-left p-2 font-medium">{h}</th>
+                        <th key={h} className="text-left p-2 font-medium text-xs uppercase tracking-wide text-muted-foreground">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {csvData.slice(0, 20).map((row, i) => (
-                      <tr key={i} className="border-b border-muted/30">
+                      <tr key={i} className="border-b border-muted/30 hover:bg-muted/20 transition-colors">
                         <td className="p-2 font-mono text-xs">{row.date}</td>
-                        <td className="p-2">{row.lst?.toFixed(1) ?? '-'}</td>
-                        <td className="p-2">{row.ndvi?.toFixed(3) ?? '-'}</td>
-                        <td className="p-2">{row.rainfall?.toFixed(4) ?? '-'}</td>
-                        <td className="p-2">{row.slope?.toFixed(1) ?? '-'}</td>
-                        <td className="p-2">
+                        <td className="p-2 text-xs">{row.lst?.toFixed(1) ?? '–'}</td>
+                        <td className="p-2 text-xs">{row.ndvi?.toFixed(3) ?? '–'}</td>
+                        <td className="p-2 text-xs">{row.rainfall?.toFixed(4) ?? '–'}</td>
+                        <td className="p-2 text-xs">{row.slope?.toFixed(1) ?? '–'}</td>
+                        <td className="p-2 text-xs">
                           {row.soil_moisture != null ? (
                             <span className="text-primary font-medium">{row.soil_moisture.toFixed(2)}</span>
                           ) : (
-                            <Badge variant="outline" className="text-xs">missing</Badge>
+                            <Badge variant="outline" className="text-[10px]">missing</Badge>
                           )}
                         </td>
-                        <td className="p-2">{row.twi?.toFixed(1) ?? '-'}</td>
+                        <td className="p-2 text-xs">{row.twi?.toFixed(1) ?? '–'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -255,31 +243,27 @@ const MineTrainingPage = () => {
           <Card className="border-2 border-primary/20">
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Brain className="h-5 w-5" />
                 </div>
                 <div>
                   <CardTitle>Train Soil Moisture Model</CardTitle>
-                  <CardDescription>
-                    {withSM.length} training samples → predict {withoutSM.length} missing values
-                  </CardDescription>
+                  <CardDescription>{withSM.length} training samples → predict {withoutSM.length} missing values</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-3">
-                <div className="p-4 rounded-lg bg-muted/50 text-center">
-                  <p className="text-3xl font-bold text-primary">{withSM.length}</p>
-                  <p className="text-sm text-muted-foreground">Training Samples</p>
-                </div>
-                <div className="p-4 rounded-lg bg-muted/50 text-center">
-                  <p className="text-3xl font-bold text-destructive">{withoutSM.length}</p>
-                  <p className="text-sm text-muted-foreground">Missing SM</p>
-                </div>
-                <div className="p-4 rounded-lg bg-muted/50 text-center">
-                  <p className="text-3xl font-bold">5</p>
-                  <p className="text-sm text-muted-foreground">Features</p>
-                </div>
+                {[
+                  { label: "Training Samples", value: withSM.length, color: "text-primary" },
+                  { label: "Missing SM", value: withoutSM.length, color: "text-destructive" },
+                  { label: "Features", value: 5, color: "" },
+                ].map((s, i) => (
+                  <div key={i} className="p-4 rounded-lg bg-muted/40 text-center">
+                    <p className={`text-3xl font-bold ${s.color}`}>{s.value}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
+                  </div>
+                ))}
               </div>
               <Button onClick={handleTrain} disabled={training || csvData.length === 0} className="w-full" size="lg">
                 {training ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Training...</> : <><Play className="mr-2 h-5 w-5" />Train Model on {mineName}</>}
@@ -295,27 +279,25 @@ const MineTrainingPage = () => {
 
           {pastRuns.length > 0 && (
             <Card>
-              <CardHeader><CardTitle className="text-lg">Previous Runs</CardTitle></CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {pastRuns.map((run, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                      <div>
-                        <p className="font-medium text-sm">{run.model_name}</p>
-                        <p className="text-xs text-muted-foreground">{run.dataset_name} • {new Date(run.created_at).toLocaleDateString()}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        {run.metrics && typeof run.metrics === 'object' && (
-                          <>
-                            <Badge variant="secondary">R² {(run.metrics as any).r2?.toFixed(3)}</Badge>
-                            <Badge variant="outline">RMSE {(run.metrics as any).rmse?.toFixed(3)}</Badge>
-                          </>
-                        )}
-                        <Badge variant={run.status === 'completed' ? 'default' : 'secondary'}>{run.status}</Badge>
-                      </div>
+              <CardHeader className="pb-3"><CardTitle className="text-base">Previous Runs</CardTitle></CardHeader>
+              <CardContent className="space-y-2">
+                {pastRuns.map((run, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border">
+                    <div>
+                      <p className="font-medium text-sm">{run.model_name}</p>
+                      <p className="text-xs text-muted-foreground">{run.dataset_name} · {new Date(run.created_at).toLocaleDateString()}</p>
                     </div>
-                  ))}
-                </div>
+                    <div className="flex gap-2">
+                      {run.metrics && typeof run.metrics === 'object' && (
+                        <>
+                          <Badge variant="secondary" className="text-xs">R² {(run.metrics as any).r2?.toFixed(3)}</Badge>
+                          <Badge variant="outline" className="text-xs">RMSE {(run.metrics as any).rmse?.toFixed(3)}</Badge>
+                        </>
+                      )}
+                      <Badge variant={run.status === 'completed' ? 'default' : 'secondary'} className="text-xs">{run.status}</Badge>
+                    </div>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           )}
@@ -327,28 +309,26 @@ const MineTrainingPage = () => {
             <>
               <div className="grid gap-4 md:grid-cols-4">
                 {[
-                  { label: "R² Score", value: result.metrics.r2?.toFixed(3), color: "text-primary" },
-                  { label: "RMSE", value: result.metrics.rmse?.toFixed(3), color: "" },
-                  { label: "MAE", value: result.metrics.mae?.toFixed(3), color: "" },
-                  { label: "NSE", value: result.metrics.nse?.toFixed(3) ?? 'N/A', color: "text-primary" },
+                  { label: "R² Score", value: result.metrics.r2?.toFixed(3), highlight: true },
+                  { label: "RMSE", value: result.metrics.rmse?.toFixed(3) },
+                  { label: "MAE", value: result.metrics.mae?.toFixed(3) },
+                  { label: "NSE", value: result.metrics.nse?.toFixed(3) ?? 'N/A', highlight: true },
                 ].map((m, i) => (
                   <Card key={i}>
                     <CardContent className="pt-6 text-center">
-                      <p className={`text-3xl font-bold ${m.color}`}>{m.value}</p>
-                      <p className="text-sm text-muted-foreground mt-1">{m.label}</p>
+                      <p className={`text-3xl font-bold ${m.highlight ? "text-primary" : ""}`}>{m.value}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{m.label}</p>
                     </CardContent>
                   </Card>
                 ))}
               </div>
 
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Observed vs Predicted Soil Moisture</CardTitle>
-                </CardHeader>
+                <CardHeader className="pb-3"><CardTitle className="text-base">Observed vs Predicted Soil Moisture</CardTitle></CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={350}>
                     <RechartsLineChart data={timeSeriesData}>
-                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                       <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={5} />
                       <YAxis domain={[0, 30]} label={{ value: 'SM (%)', angle: -90, position: 'insideLeft', style: { fontSize: 11 } }} />
                       <Tooltip />
@@ -362,11 +342,11 @@ const MineTrainingPage = () => {
 
               {result.feature_importance?.length > 0 && (
                 <Card>
-                  <CardHeader><CardTitle className="text-lg">Feature Importance</CardTitle></CardHeader>
+                  <CardHeader className="pb-3"><CardTitle className="text-base">Feature Importance</CardTitle></CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={250}>
                       <BarChart data={result.feature_importance.sort((a, b) => b.importance - a.importance)} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                         <XAxis type="number" domain={[0, 1]} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
                         <YAxis type="category" dataKey="feature" width={120} tick={{ fontSize: 11 }} />
                         <Tooltip formatter={(v: number) => `${(v * 100).toFixed(1)}%`} />
@@ -377,18 +357,18 @@ const MineTrainingPage = () => {
                 </Card>
               )}
 
-              <Card className="border-2 border-primary/20 bg-primary/5">
-                <CardHeader>
+              <Card className="border-primary/20 bg-primary/5">
+                <CardHeader className="pb-3">
                   <div className="flex items-center gap-2">
                     <Zap className="h-5 w-5 text-primary" />
-                    <CardTitle>Model Summary</CardTitle>
+                    <CardTitle className="text-base">Model Summary</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm">{result.model_summary}</p>
                   <div className="mt-3 flex gap-2">
-                    <Badge>Training: {result.training_samples} samples</Badge>
-                    <Badge variant="outline">Predicted: {result.prediction_samples} values</Badge>
+                    <Badge className="text-xs">Training: {result.training_samples} samples</Badge>
+                    <Badge variant="outline" className="text-xs">Predicted: {result.prediction_samples} values</Badge>
                   </div>
                 </CardContent>
               </Card>
@@ -396,9 +376,9 @@ const MineTrainingPage = () => {
           ) : (
             <Card className="py-16 text-center">
               <CardContent>
-                <Brain className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                <p className="text-lg font-medium">No Results Yet</p>
-                <p className="text-muted-foreground mt-1">Go to Train Model tab to run training</p>
+                <Brain className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
+                <p className="font-medium">No Results Yet</p>
+                <p className="text-sm text-muted-foreground mt-1">Go to the Train Model tab to run training</p>
               </CardContent>
             </Card>
           )}
@@ -411,22 +391,22 @@ const MineTrainingPage = () => {
               <CardTitle>Training Methodology — {mineName}</CardTitle>
               <CardDescription>End-to-end pipeline for soil moisture prediction</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4">
               {[
                 { step: "1. Data Collection", tasks: ["Monthly composites: Sentinel-2 (NDVI), MODIS (LST), CHIRPS (Rainfall)", "SRTM DEM-derived Slope and TWI", "ERA5 soil moisture reanalysis as target variable"] },
                 { step: "2. Feature Engineering", tasks: ["LST: Land Surface Temperature — thermal driver", "NDVI: Vegetation greenness, correlates with SM retention", "Rainfall: Strongest SM predictor", "Slope & TWI: Topographic water flow controls"] },
-                { step: "3. Data Validation", tasks: ["Range checks: NDVI [-1,1], LST [-30,70°C], SM [0,100%]", "Outlier detection via Z-score analysis", "Completeness scoring and quality grade (A–F)", "Cross-validation with literature values"] },
+                { step: "3. Data Validation", tasks: ["Range checks: NDVI [-1,1], LST [-30,70°C], SM [0,100%]", "Outlier detection via Z-score analysis", "Completeness scoring and quality grade (A–F)"] },
                 { step: "4. Model Training", tasks: [`AI-ensemble trained on ${withSM.length} known SM samples`, "Multi-variate regression: LST, NDVI, Rainfall, Slope, TWI → SM", "Accounts for seasonal patterns and thermal effects"] },
                 { step: "5. Validation", tasks: ["Cross-validation R², RMSE, MAE metrics", "Predicted SM for reclamation suitability", "Results stored for comparison across mine sites"] },
               ].map((phase, idx) => (
                 <Card key={idx} className="border-l-4 border-l-primary">
-                  <CardHeader className="pb-3"><CardTitle className="text-lg">{phase.step}</CardTitle></CardHeader>
+                  <CardHeader className="pb-2"><CardTitle className="text-base">{phase.step}</CardTitle></CardHeader>
                   <CardContent>
-                    <ul className="space-y-2 text-sm">
+                    <ul className="space-y-1.5 text-sm">
                       {phase.tasks.map((t, i) => (
                         <li key={i} className="flex items-start gap-2">
-                          <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" />
-                          <span>{t}</span>
+                          <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" />
+                          <span className="text-muted-foreground">{t}</span>
                         </li>
                       ))}
                     </ul>

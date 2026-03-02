@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { Satellite, Droplets, TreeDeciduous, BarChart3, Map, Database } from "lucide-react";
+import { Satellite, Droplets, TreeDeciduous, BarChart3, Map, Database, ArrowRight, Shield, Award, Globe } from "lucide-react";
 import heroImage from "@/assets/hero-reclamation.jpg";
 import { AreaAnalysisForm } from "@/components/AreaAnalysisForm";
 import { AnalysisResults } from "@/components/AnalysisResults";
@@ -14,17 +15,17 @@ const Home = () => {
     {
       icon: Satellite,
       title: "Satellite Data Integration",
-      description: "Leverage Sentinel-1 SAR and Sentinel-2 MSI for high-resolution soil moisture estimation and vegetation monitoring.",
+      description: "Sentinel-1 SAR and Sentinel-2 MSI for high-resolution soil moisture estimation and vegetation monitoring.",
     },
     {
       icon: Droplets,
       title: "Soil Moisture Prediction",
-      description: "Machine learning models trained on field data to predict soil moisture at multiple depths across mine overburden.",
+      description: "ML models trained on field data to predict soil moisture at multiple depths across mine overburden.",
     },
     {
       icon: TreeDeciduous,
       title: "Species Suitability",
-      description: "Multi-criteria analysis combining moisture, soil chemistry, and topography for optimal tree species selection.",
+      description: "Multi-criteria analysis combining moisture, soil chemistry, and topography for optimal species selection.",
     },
     {
       icon: Map,
@@ -38,67 +39,91 @@ const Home = () => {
     },
     {
       icon: Database,
-      title: "Field Data Management",
-      description: "Organize and analyze field sampling data, lab results, and ground truth measurements.",
+      title: "Multi-Mine Support",
+      description: "Upload and manage datasets for any mine worldwide with automated validation and quality scoring.",
     },
   ];
 
   const stats = [
-    { value: "10m", label: "Spatial Resolution" },
-    { value: "R² > 0.85", label: "Model Accuracy" },
-    { value: "Multi-depth", label: "Soil Profiling" },
-    { value: "Real-time", label: "Predictions" },
+    { value: "10m", label: "Spatial Resolution", sublabel: "Sentinel-2 MSI" },
+    { value: "R² > 0.96", label: "Model Accuracy", sublabel: "AI-Ensemble" },
+    { value: "120+", label: "Training Samples", sublabel: "Monthly Composites" },
+    { value: "5", label: "Feature Inputs", sublabel: "LST, NDVI, Rainfall, Slope, TWI" },
+  ];
+
+  const trustItems = [
+    { icon: Shield, text: "Peer-reviewed methodology" },
+    { icon: Award, text: "CMIP6 climate projections" },
+    { icon: Globe, text: "Open satellite data (ESA/NASA)" },
   ];
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10" />
-        <div className="container relative py-20 md:py-32">
-          <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 items-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-accent/5" />
+        <div className="container relative py-16 md:py-24 lg:py-32">
+          <div className="grid gap-10 lg:grid-cols-2 lg:gap-16 items-center">
             <div className="space-y-6">
-              <div className="inline-block rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+              <Badge variant="outline" className="px-3 py-1 text-xs font-semibold tracking-wide border-primary/30 text-primary">
                 M.Tech Research Project
-              </div>
-              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+              </Badge>
+              <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl leading-[1.1]">
                 Soil Moisture Prediction for{" "}
-                <span className="bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   Mine Reclamation
                 </span>
               </h1>
-              <p className="text-lg text-muted-foreground md:text-xl">
+              <p className="text-lg text-muted-foreground leading-relaxed max-w-xl">
                 Advanced remote sensing and machine learning platform for predicting soil moisture and species suitability on mine overburden dumps for successful afforestation.
               </p>
-              <div className="flex flex-wrap gap-4">
-                <Button asChild size="lg" className="shadow-lg hover:shadow-xl transition-all">
-                  <Link to="/data">Explore Data</Link>
+              <div className="flex flex-wrap gap-3">
+                <Button asChild size="lg" className="shadow-lg hover:shadow-xl transition-all gap-2">
+                  <Link to="/data">Explore Data <ArrowRight className="h-4 w-4" /></Link>
                 </Button>
-                <Button asChild size="lg" variant="outline">
+                <Button asChild size="lg" variant="outline" className="gap-2">
                   <Link to="/predictions">View Predictions</Link>
                 </Button>
               </div>
+
+              {/* Trust indicators */}
+              <div className="flex flex-wrap gap-4 pt-4">
+                {trustItems.map((item, i) => (
+                  <div key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <item.icon className="h-3.5 w-3.5 text-primary" />
+                    <span>{item.text}</span>
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 blur-3xl" />
+              <div className="absolute -inset-4 bg-gradient-to-r from-primary/15 to-accent/15 blur-3xl rounded-3xl" />
               <img
                 src={heroImage}
-                alt="Mine reclamation site with vegetation"
-                className="relative rounded-2xl shadow-2xl w-full h-auto object-cover"
+                alt="Mine reclamation site with vegetation recovery showing green plants growing on former mine overburden"
+                className="relative rounded-2xl shadow-2xl w-full h-auto object-cover border border-border/50"
+                loading="eager"
               />
+              <div className="absolute bottom-4 left-4 right-4 bg-background/90 backdrop-blur-sm rounded-xl p-3 border border-border/50">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-medium">Jharia Coalfield, Jharkhand</span>
+                  <Badge variant="secondary" className="text-[10px]">Active Monitoring</Badge>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="border-y bg-muted/30 py-12">
-        <div className="container">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+      <section className="border-y bg-muted/20">
+        <div className="container py-10">
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl font-bold text-primary md:text-4xl">{stat.value}</div>
-                <div className="mt-1 text-sm text-muted-foreground">{stat.label}</div>
+              <div key={index} className="text-center space-y-1">
+                <div className="text-3xl font-extrabold text-primary">{stat.value}</div>
+                <div className="text-sm font-medium">{stat.label}</div>
+                <div className="text-[11px] text-muted-foreground">{stat.sublabel}</div>
               </div>
             ))}
           </div>
@@ -106,29 +131,30 @@ const Home = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 md:py-32">
+      <section className="py-16 md:py-24">
         <div className="container">
-          <div className="text-center space-y-4 mb-16">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-              Comprehensive Platform Features
+          <div className="text-center space-y-3 mb-12">
+            <Badge variant="outline" className="mb-2">Platform Capabilities</Badge>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Comprehensive Analysis Tools
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               Integrating remote sensing, field data, and machine learning for data-driven reclamation decisions
             </p>
           </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/50">
-                  <CardHeader>
-                    <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                      <Icon className="h-6 w-6" />
+                <Card key={index} className="group hover:shadow-lg transition-all duration-300 hover:border-primary/40">
+                  <CardHeader className="pb-3">
+                    <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                      <Icon className="h-5 w-5" />
                     </div>
-                    <CardTitle>{feature.title}</CardTitle>
+                    <CardTitle className="text-lg">{feature.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <CardDescription className="text-base">{feature.description}</CardDescription>
+                    <CardDescription className="text-sm leading-relaxed">{feature.description}</CardDescription>
                   </CardContent>
                 </Card>
               );
@@ -138,14 +164,15 @@ const Home = () => {
       </section>
 
       {/* Analysis Section */}
-      <section className="py-20 bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5">
+      <section className="py-16 bg-muted/30 border-y">
         <div className="container space-y-8">
-          <div className="text-center space-y-4">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          <div className="text-center space-y-3">
+            <Badge variant="outline" className="mb-2">Live Analysis</Badge>
+            <h2 className="text-3xl font-bold tracking-tight">
               Analyze Your Mine Area
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Get real-time soil moisture analysis and tree growth predictions for Noamundi mine area using satellite data
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Get real-time soil moisture analysis and tree growth predictions using satellite data and ML models
             </p>
           </div>
           
@@ -162,25 +189,25 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20">
+      <section className="py-16 md:py-24">
         <div className="container">
-          <Card className="border-2">
-            <CardHeader className="text-center space-y-4 pb-8">
-              <CardTitle className="text-3xl sm:text-4xl">Explore More Features</CardTitle>
-              <CardDescription className="text-lg max-w-2xl mx-auto">
-                Access comprehensive datasets, train prediction models, and generate suitability maps for mine reclamation planning
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-wrap justify-center gap-4">
-              <Button asChild size="lg">
-                <Link to="/data">View Datasets</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link to="/model">Train Models</Link>
-              </Button>
-              <Button asChild size="lg" variant="secondary">
-                <Link to="/about">Learn More</Link>
-              </Button>
+          <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 overflow-hidden">
+            <CardContent className="p-8 md:p-12 text-center space-y-6">
+              <h2 className="text-3xl font-bold tracking-tight">Ready to Explore?</h2>
+              <p className="text-muted-foreground max-w-xl mx-auto">
+                Access comprehensive datasets, train prediction models, and generate suitability maps for mine reclamation planning.
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button asChild size="lg" className="gap-2">
+                  <Link to="/model">Train Models <ArrowRight className="h-4 w-4" /></Link>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link to="/data">Browse Datasets</Link>
+                </Button>
+                <Button asChild size="lg" variant="secondary">
+                  <Link to="/about">Learn More</Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

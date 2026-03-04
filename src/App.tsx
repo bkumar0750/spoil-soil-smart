@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import DataOverview from "./pages/DataOverview";
 import ModelTraining from "./pages/ModelTraining";
 import MineTrainingPage from "./pages/MineTrainingPage";
+import ComparisonDashboard from "./pages/ComparisonDashboard";
 import Predictions from "./pages/Predictions";
 import About from "./pages/About";
 import ClimateProjections from "./pages/ClimateProjections";
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/data" element={<DataOverview />} />
             <Route path="/model" element={<ModelTraining />} />
             <Route path="/model/:mineId" element={<MineTrainingPage />} />
+            <Route path="/model/compare" element={<ComparisonDashboard />} />
             <Route path="/predictions" element={<Predictions />} />
             <Route path="/climate" element={<ClimateProjections />} />
             <Route path="/about" element={<About />} />

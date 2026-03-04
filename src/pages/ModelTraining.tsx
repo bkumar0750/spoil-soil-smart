@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { BarChart3 } from "lucide-react";
 import MineSelector from "@/components/MineSelector";
 import AddMineForm from "@/components/AddMineForm";
 
@@ -16,6 +18,11 @@ const ModelTraining = () => {
         <p className="text-muted-foreground max-w-3xl">
           Upload training data for any mine site worldwide. Each dataset is validated for quality and used to train soil moisture prediction models independently.
         </p>
+        <Link to="/model/compare">
+          <Button variant="outline" size="sm" className="gap-2 mt-2">
+            <BarChart3 className="h-4 w-4" /> Compare Models
+          </Button>
+        </Link>
       </div>
 
       {view === 'list' ? (
